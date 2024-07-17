@@ -18,7 +18,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from rag.utils import format_docs, format_searched_docs
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings
-from const import env_openai, index_name, embedding_model, env_tavily
+from const import env_openai, index_name, embedding_model, env_tavily, env_pinecone
 from llm_chain import llm_chain, llm_chain_normal
 from langgraph.graph import END, StateGraph
 from langgraph.checkpoint.memory import MemorySaver
@@ -44,7 +44,7 @@ class GraphState(TypedDict):
 
 embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
 docsearch = PineconeVectorStore.from_existing_index(
-    index_name=index_name, embedding=embeddings
+    index_name=index_name, embedding=embeddings, api_key=env_pinecone
 )
 retriever = docsearch.as_retriever(
     search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}

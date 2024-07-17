@@ -18,6 +18,7 @@ env_tavily = st.secrets["Tavily_API_KEY_An"]
 env_openai = st.secrets["OPENAI_API_KEY_FundastA"]
 env_genai = st.secrets["Gemini_API_KEY_An"]
 env_smith = st.secrets["LANGCHAIN_API_KEY"]
+env_pinecone = st.secrets["Pinecone_API_KEY"]
 
 
 # GraphState is a TypedDict that defines the structure of the  graph state
