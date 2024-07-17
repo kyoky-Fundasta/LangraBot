@@ -9,5 +9,4 @@ langgraph
 rag
 ipython
 graphviz
-pprint
 text-tools
