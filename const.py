@@ -1,18 +1,23 @@
 import os
 from dotenv import load_dotenv
 from typing import TypedDict
+import streamlit as st
 
-home_directory = os.path.expanduser("~")
-env_folder = os.path.join(home_directory, ".openai")
-env_path = os.path.join(env_folder, ".env")
-_ = load_dotenv(env_path)
+# home_directory = os.path.expanduser("~")
+# env_folder = os.path.join(home_directory, ".openai")
+# env_path = os.path.join(env_folder, ".env")
+# _ = load_dotenv(env_path)
 
-env_tavily = os.getenv("Tavily_API_KEY_An")
-env_openai = os.getenv("OPENAI_API_KEY_FundastA")
-env_genai = os.getenv("Gemini_API_KEY_An")
-env_smith = os.getenv("LANGCHAIN_API_KEY")
+# env_tavily = os.getenv("Tavily_API_KEY_An")
+# env_openai = os.getenv("OPENAI_API_KEY_FundastA")
+# env_genai = os.getenv("Gemini_API_KEY_An")
+# env_smith = os.getenv("LANGCHAIN_API_KEY")
 embedding_model = "text-embedding-3-small"
 index_name = "fundasta"
+env_tavily = st.secrets("Tavily_API_KEY_An")
+env_openai = st.secrets("OPENAI_API_KEY_FundastA")
+env_genai = st.secrets("Gemini_API_KEY_An")
+env_smith = st.secrets("LANGCHAIN_API_KEY")
 
 
 # GraphState is a TypedDict that defines the structure of the  graph state
