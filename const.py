@@ -14,10 +14,10 @@ import streamlit as st
 # env_smith = os.getenv("LANGCHAIN_API_KEY")
 embedding_model = "text-embedding-3-small"
 index_name = "fundasta"
-env_tavily = st.secrets("Tavily_API_KEY_An")
-env_openai = st.secrets("OPENAI_API_KEY_FundastA")
-env_genai = st.secrets("Gemini_API_KEY_An")
-env_smith = st.secrets("LANGCHAIN_API_KEY")
+env_tavily = st.secrets["Tavily_API_KEY_An"]
+env_openai = st.secrets["OPENAI_API_KEY_FundastA"]
+env_genai = st.secrets["Gemini_API_KEY_An"]
+env_smith = st.secrets["LANGCHAIN_API_KEY"]
 
 
 # GraphState is a TypedDict that defines the structure of the  graph state
