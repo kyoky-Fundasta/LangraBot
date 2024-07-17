@@ -1,0 +1,4 @@
+root: C:\Users\kyoky\Desktop\An\langraphBot 
+path: C:\Program Files\nodejs 
+arch: 64 
+proxy: none

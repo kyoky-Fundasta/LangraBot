@@ -7,6 +7,10 @@ from langchain_core.output_parsers import CommaSeparatedListOutputParser
 
 def llm_chain(state: GraphState, model):
     output_parser = CommaSeparatedListOutputParser()
+    chat_history_str = "\n".join(
+        [f"ユーザー: {q}\nAI: {a}" for q, a in state["chat_history"]]
+    )
+
     prompt = ChatPromptTemplate.from_messages(
         [
             (
@@ -15,13 +19,18 @@ def llm_chain(state: GraphState, model):
             ),
             (
                 "human",
-                "就業規則(domument)とウェブ検索結果(Web_Search)を参考にしてユーザーの質問(question)に答えてください。答えが見つからなかった場合には丁寧に誤って'情報が見つからなかったためお答えできません'と言ってください。\n\n#就業規則: {document}\n\n#ウェブ検索結果: {web_search}\n\n#質問: {question}\n\n#Your_answer:",
+                f"以下のチャット履歴(chat_history)、就業規則(document)とウェブ検索結果(Web_Search)を参考にしてユーザーの質問(question)に答えてください。答えが見つからなかった場合には丁寧に誤って'情報が見つからなかったためお答えできません'と言ってください。\n\n#チャット履歴: {chat_history_str}\n\n#就業規則: {{document}}\n\n#ウェブ検索結果: {{web_search}}\n\n#質問: {{question}}\n\n#Your_answer:",
             ),
         ]
     )
-    prompt = prompt.partial(document=state["context"], web_search=state["web"])
+    prompt = prompt.partial(
+        document=state["context"],
+        web_search=state["web"],
+        chat_history=state["chat_history"],
+    )
     llm = ChatOpenAI(model_name=model, openai_api_key=env_openai)
     chain = prompt | llm | output_parser
+    print("\n\n###Prompt 1 :", prompt, "\n")
     output = chain.invoke({"question": state["question"]})
     state["answer"] = output
     return state
@@ -29,6 +38,10 @@ def llm_chain(state: GraphState, model):
 
 def llm_chain_normal(state: GraphState, model):
     output_parser = CommaSeparatedListOutputParser()
+    chat_history_str = "\n".join(
+        [f"ユーザー: {q}\nAI: {a}" for q, a in state["chat_history"]]
+    )
+
     prompt = ChatPromptTemplate.from_messages(
         [
             (
@@ -37,13 +50,14 @@ def llm_chain_normal(state: GraphState, model):
             ),
             (
                 "human",
-                "{question}\n\n#Your_answer:",
+                f"以下のチャット履歴(chat_history)を参考にしてユーザーの質問(question)に答えてください。\n\n#チャット履歴: {chat_history_str}\n\n#質問: {{question}}\n\n#Your_answer:",
             ),
         ]
     )
     prompt = prompt.partial()
     llm = ChatOpenAI(model_name=model, openai_api_key=env_openai)
     chain = prompt | llm | output_parser
+    print("\n\n###Prompt 2 :", prompt)
     output = chain.invoke({"question": state["question"]})
     state["answer"] = output
     return state

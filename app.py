@@ -1,5 +1,8 @@
 # %%
 import os
+import re
+
+from graphviz import Graph
 
 # import re
 
@@ -20,8 +23,8 @@ from llm_chain import llm_chain, llm_chain_normal
 from langgraph.graph import END, StateGraph
 from langgraph.checkpoint.memory import MemorySaver
 
-# from IPython.display import Image, display
-# from graphviz import Digraph
+from IPython.display import Image, display
+from graphviz import Digraph
 import pprint
 from langgraph.errors import GraphRecursionError
 from langchain_core.runnables import RunnableConfig
@@ -32,9 +35,9 @@ from test_sample import tavily_result1
 # Define GraphState including chat_history
 class GraphState(TypedDict):
     question: str
+    answer: str
     context: str
     web: str
-    answer: str
     relevance: str
     chat_history: list  # Added chat_history
 
@@ -59,10 +62,10 @@ def retrieve_document(state: GraphState) -> GraphState:
     # Preserve it in a GraphState
     return GraphState(
         question=state["question"],
+        answer=state["answer"],
         context=retrieved_docs,
         chat_history=state["chat_history"],
         web=state["web"],
-        answer=state["answer"],
         relevance=state["relevance"],
     )
 
@@ -71,9 +74,12 @@ def retrieve_document(state: GraphState) -> GraphState:
 def llm_answer(state: GraphState) -> GraphState:
     # Generate AI answer
     response_state = llm_chain(state, model_name)
+    print("\n\n@@@@@@@@@@@@@@@@@@@", response_state)
+    answer = "".join(response_state["answer"])
+    print("####################", answer)
     return GraphState(
         question=state["question"],
-        answer=response_state["answer"],
+        answer=answer,
         context=state["context"],
         chat_history=state["chat_history"],
         web=state["web"],
@@ -133,7 +139,7 @@ def rewrite(state: GraphState) -> GraphState:
 def search_on_web(state: GraphState) -> GraphState:
     # Tavily web search
     search = TavilySearchAPIWrapper()
-    search_tool = TavilySearchResults(max_results=5, api_wrapper=search)
+    search_tool = TavilySearchResults(max_results=6, api_wrapper=search)
     search_result = search_tool.invoke({"query": state["question"]})
 
     # # Test data for saving tavily search api
@@ -156,6 +162,7 @@ def search_on_web(state: GraphState) -> GraphState:
 
 # Question-Answer check
 def relevance_check(state: GraphState) -> GraphState:
+    print("\n\n$$$$$$check!!!!!!!$$$$$$$\n\n")
     # Double check. result: Yes, No, Not_sure
     prompt = ChatPromptTemplate.from_messages(
         [
@@ -179,7 +186,7 @@ def relevance_check(state: GraphState) -> GraphState:
     model = ChatOpenAI(temperature=0, model=model_name, openai_api_key=env_openai)
     chain = prompt | model | StrOutputParser()
     response = chain.invoke({"question": state["question"], "answer": state["answer"]})
-    print(response)
+    print("Check response :", response)
     return GraphState(
         question=state["question"],
         context=state["context"],
@@ -242,8 +249,17 @@ def chat(user_question, chat_history):
         chat_history=chat_history,
     )
 
-    # Conduct relevance check
+    # Conduct relevance check by exact company name
     relevance_state = relevance_check_first(initial_state)
+    # if "FundastA" in user_question:
+    #     relevance_state["relevance"] = "Yes"
+
+    # Conduct relevance check by Regular Expression pattern check : Not yet Test
+    pattern = re.compile(r"fundasta", re.IGNORECASE)
+    flag_1 = "Ordinary Question"
+    if pattern.search(user_question):
+        relevance_state["relevance"] = "Yes"
+        flag_1 = "FundastA question"
 
     if relevance_state["relevance"] == "No":
         initial_answer_state = llm_chain_normal(initial_state, model_name)
@@ -252,17 +268,31 @@ def chat(user_question, chat_history):
         # Node definition
         workflow.add_node("retrieve", retrieve_document)
         workflow.add_node("llm_answer", llm_answer)
+        workflow.add_node("llm_answer_continue", llm_answer)
         workflow.add_node("rewrite", rewrite)
         workflow.add_node("search_on_web", search_on_web)
         workflow.add_node("relevance_check", relevance_check)
+        workflow.add_node("relevance_check_continue", relevance_check)
         # Connect nodes to each other
         workflow.add_edge("retrieve", "llm_answer")
         workflow.add_edge("llm_answer", "relevance_check")
+        workflow.add_edge("relevance_check", "search_on_web")
+        workflow.add_edge("search_on_web", "llm_answer_continue")
+        workflow.add_edge("llm_answer_continue", "relevance_check_continue")
         workflow.add_edge("rewrite", "search_on_web")
-        workflow.add_edge("search_on_web", "llm_answer")
+
         # If statement
         workflow.add_conditional_edges(
             "relevance_check",
+            is_relevant,
+            {
+                "Yes": END,  # Finish
+                "No": "search_on_web",  # Rewrite
+                "Not_sure": "search_on_web",  # Rewrite
+            },
+        )
+        workflow.add_conditional_edges(
+            "relevance_check_continue",
             is_relevant,
             {
                 "Yes": END,  # Finish
@@ -274,13 +304,17 @@ def chat(user_question, chat_history):
         workflow.set_entry_point("retrieve")
         memory = MemorySaver()
         app = workflow.compile(checkpointer=memory)
+
         #   Draw a diagram describing reasoning flow
         # try:
         #     graph = app.get_graph(xray=True)
         #     # Using draw_mermaid_png to render the graph
         #     png_bytes = graph.draw_mermaid_png()
-        #     # Display the graph
-        #     display(Image(png_bytes))
+        #     if png_bytes:
+        #         # Display the graph
+        #         display(Image(png_bytes))
+        #     else:
+        #         print("No PNG bytes generated")
         # except Exception as e:
         #     print(f"An error occurred: {e}")
 
@@ -301,29 +335,52 @@ def chat(user_question, chat_history):
         try:
             for output in app.stream(inputs, config=config):
                 for key, value in output.items():
-                    pprint.pprint(f"Output from node '{key}':")
+                    pprint.pprint(f"\nOutput from node '{key}':")
                     pprint.pprint("---")
                     pprint.pprint(value, indent=2, width=80, depth=None)
                     if key == "llm_answer" and "answer" in value:
                         final_answer = value["answer"]
+
+                    if key == "llm_answer_continue" and "answer" in value:
+                        final_answer = value["answer"]
+
+                    elif key == "relevance_check_continue" and "relevance" in value:
+                        relevancy = value["relevance"]
+
                     elif key == "relevance_check" and "relevance" in value:
                         relevancy = value["relevance"]
+
         except GraphRecursionError as e:
             print(f"Recursion limit reached: {e}")
 
-        # print("\n\n***Final Answer*** :", final_answer, relevancy)
-        return final_answer[0] + "💛"
+        flag_2 = ""
+        flag_3 = ""
+        if GraphState["context"] != "":
+            flag_2 = "Context available"
+        if GraphState["web"] != "":
+            flag_3 = "Web search available"
+
+        print(
+            "\n\n***Final Answer*** :",
+            final_answer,
+            "relevancy:",
+            relevancy,
+            flag_1,
+            flag_2,
+            flag_3,
+        )
+        return final_answer + "💛"
 
 
 # Example usage
 if __name__ == "__main__":
     chat_history = []  # Initialize chat history
-    question_1 = "こんにちは"
+    question_1 = "FundastAの資本金はいくらですか"
     answer_1 = chat(question_1, chat_history)
-    chat_history.append((question_1, answer_1))
-    print(answer_1)
+    # chat_history.append((question_1, answer_1))
+    # print(answer_1)
 
-    # question_2 = "そうするとフランスは。"
+    # question_2 = "私の名前はなあに？"
     # answer_2 = chat(question_2, chat_history)
     # chat_history.append((question_2, answer_2))
     # print(answer_2)

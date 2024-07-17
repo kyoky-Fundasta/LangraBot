@@ -1,0 +1,13 @@
+streamlit
+python-dotenv
+langchain-core
+langchain-openai
+langchain-pinecone
+langchain-upstage
+langchain-community
+langgraph
+rag
+ipython
+graphviz
+pprint
+text-tools

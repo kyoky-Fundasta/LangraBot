@@ -6,6 +6,11 @@ from app import chat
 st.set_page_config(layout="wide")
 st.title("💬 FundastA サポートデスク")
 st.caption("🤖 私は株式会社FundastAのAIアシストです。")
+
+
+menu_options = ["ChatGPT 3.5", "ChatGPT 4o", "Gemini", "Claude"]
+ai_bot = st.selectbox("LLM models", menu_options)
+
 st.sidebar.title("MENU")
 ai_bot = st.sidebar.radio("", ["チャットで質問", "メールで問い合わせ", "資料検索"])
 
@@ -13,12 +18,6 @@ if ai_bot == "チャットで質問":
 
     if "message" not in st.session_state:
         st.session_state["message"] = []
-        st.session_state["message"].append(
-            {
-                "role": "assistant",
-                "content": "私はユーザーの質問に答える株式会社FundastAのAIチャットボットです",
-            }
-        )
 
     if "chat_history" not in st.session_state:
         st.session_state["chat_history"] = []
@@ -28,7 +27,7 @@ if ai_bot == "チャットで質問":
 
     if prompt:
 
-        with st.spinner("🤖 資料を検索中......"):
+        with st.spinner("🤖 考え中......"):
             ai_answer = chat(
                 user_question=prompt, chat_history=st.session_state["chat_history"]
             )
