@@ -37,9 +37,6 @@ from langgraph.errors import GraphRecursionError
 from langchain_core.runnables import RunnableConfig
 from test_sample import tavily_result1
 import pinecone
-
-pinecone.init(api_key=env_pinecone, environment=pinecone_environment)
-
 from pinecone import Pinecone, ServerlessSpec
 
 pc = Pinecone(api_key=env_pinecone, environment=pinecone_environment)
