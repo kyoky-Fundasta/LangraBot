@@ -35,12 +35,14 @@ from graphviz import Digraph
 import pprint
 from langgraph.errors import GraphRecursionError
 from langchain_core.runnables import RunnableConfig
-from pinecone import Pinecone, ServerlessSpec
 from test_sample import tavily_result1
+import pinecone
 
-pc = Pinecone(
-    api_key=env_pinecone,
-)
+pinecone.init(api_key=env_pinecone, environment=pinecone_environment)
+
+from pinecone import Pinecone, ServerlessSpec
+
+pc = Pinecone(api_key=env_pinecone, environment=pinecone_environment)
 
 
 # Define GraphState including chat_history
