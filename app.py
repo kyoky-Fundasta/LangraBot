@@ -18,7 +18,14 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from rag.utils import format_docs, format_searched_docs
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings
-from const import env_openai, index_name, embedding_model, env_tavily, env_pinecone
+from const import (
+    env_openai,
+    index_name,
+    embedding_model,
+    env_tavily,
+    env_pinecone,
+    pinecone_environment,
+)
 from llm_chain import llm_chain, llm_chain_normal
 from langgraph.graph import END, StateGraph
 from langgraph.checkpoint.memory import MemorySaver
@@ -28,10 +35,12 @@ from graphviz import Digraph
 import pprint
 from langgraph.errors import GraphRecursionError
 from langchain_core.runnables import RunnableConfig
-import pinecone
+from pinecone import Pinecone, ServerlessSpec
 from test_sample import tavily_result1
 
-pinecone.init(api_key=env_pinecone)
+pc = Pinecone(
+    api_key=env_pinecone,
+)
 
 
 # Define GraphState including chat_history
