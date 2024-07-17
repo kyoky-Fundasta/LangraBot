@@ -28,8 +28,10 @@ from graphviz import Digraph
 import pprint
 from langgraph.errors import GraphRecursionError
 from langchain_core.runnables import RunnableConfig
-
+import pinecone
 from test_sample import tavily_result1
+
+pinecone.init(api_key=env_pinecone)
 
 
 # Define GraphState including chat_history
@@ -44,7 +46,7 @@ class GraphState(TypedDict):
 
 embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
 docsearch = PineconeVectorStore.from_existing_index(
-    index_name=index_name, embedding=embeddings, api_key=env_pinecone
+    index_name=index_name, embedding=embeddings
 )
 retriever = docsearch.as_retriever(
     search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
