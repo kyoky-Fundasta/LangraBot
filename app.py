@@ -64,8 +64,9 @@ try:
     retriever = docsearch.as_retriever(
         search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
     )
+    print("\n\n!!!!!Pinecone initialized successfully.!!!!!\n\n")
 except Exception as e:
-    print(f"Error initializing Pinecone: {str(e)}")
+    print(f"\n\nError initializing Pinecone: {str(e)}, key : {env_pinecone[:5]}")
 
 
 os.environ["TAVILY_API_KEY"] = env_tavily
@@ -158,7 +159,7 @@ def rewrite(state: GraphState) -> GraphState:
 def search_on_web(state: GraphState) -> GraphState:
     # Tavily web search
     search = TavilySearchAPIWrapper()
-    search_tool = TavilySearchResults(max_results=6, api_wrapper=search)
+    search_tool = TavilySearchResults(max_results=4, api_wrapper=search)
     search_result = search_tool.invoke({"query": state["question"]})
 
     # # Test data for saving tavily search api
