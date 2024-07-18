@@ -9,4 +9,4 @@ rag
 ipython
 graphviz
 text-tools
-pinecone-clien
+pinecone-client
