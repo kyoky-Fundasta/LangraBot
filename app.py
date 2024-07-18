@@ -36,10 +36,9 @@ import pprint
 from langgraph.errors import GraphRecursionError
 from langchain_core.runnables import RunnableConfig
 from test_sample import tavily_result1
-import pinecone
-from pinecone import Pinecone, ServerlessSpec
+from pinecone import Pinecone
 
-pc = Pinecone(api_key=env_pinecone, environment=pinecone_environment)
+pc = Pinecone(api_key=env_pinecone)
 
 
 # Define GraphState including chat_history
@@ -53,12 +52,17 @@ class GraphState(TypedDict):
 
 
 embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
-docsearch = PineconeVectorStore.from_existing_index(
-    index_name=index_name, embedding=embeddings, pinecone_client=pc
-)
-retriever = docsearch.as_retriever(
-    search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
-)
+try:
+    docsearch = PineconeVectorStore.from_existing_index(
+        index_name=index_name, embedding=embeddings, environment=pinecone_environment
+    )
+    retriever = docsearch.as_retriever(
+        search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
+    )
+except Exception as e:
+    print(f"Error initializing Pinecone: {str(e)}")
+
+
 os.environ["TAVILY_API_KEY"] = env_tavily
 model_name = "gpt-3.5-turbo-0125"
 
