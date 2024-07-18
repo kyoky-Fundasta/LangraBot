@@ -1,5 +1,5 @@
 python-dotenv==1.0.1
-langchain-core==0.1.52
+langchain-core>=0.2.2,<0.3
 langchain-openai==0.1.14
 langchain-pinecone==0.0.1
 langchain-upstage==0.1.7
