@@ -1,12 +1,12 @@
 python-dotenv
-langchain-core==*
-langchain-openai==*
-langchain-pinecone==*
+langchain-core
+langchain-openai
+langchain-pinecone
 langchain-upstage
 langchain-community
-langgraph==*
+langgraph
 rag
 ipython
 graphviz
 text-tools
-pinecone-client==*
+pinecone-client

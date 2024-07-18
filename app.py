@@ -38,7 +38,7 @@ from langchain_core.runnables import RunnableConfig
 from test_sample import tavily_result1
 from pinecone import Pinecone
 
-pc = Pinecone(api_key=env_pinecone)
+pinecone_client = Pinecone(api_key=env_pinecone, environment=pinecone_environment)
 
 
 # Define GraphState including chat_history
@@ -54,8 +54,7 @@ class GraphState(TypedDict):
 embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
 try:
     docsearch = PineconeVectorStore.from_existing_index(
-        index_name=index_name,
-        embedding=embeddings,
+        index_name=index_name, embedding=embeddings, pinecone_client=pinecone_client
     )
     retriever = docsearch.as_retriever(
         search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
