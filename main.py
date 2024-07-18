@@ -23,7 +23,7 @@ if ai_bot == "チャットで質問":
         st.session_state["chat_history"] = []
 
     with st.container():
-        prompt = st.chat_input("👤質問を入力してください", label_visibility="hidden")
+        prompt = st.chat_input("👤質問を入力してください")
 
     if prompt:
 
