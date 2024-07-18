@@ -36,9 +36,13 @@ import pprint
 from langgraph.errors import GraphRecursionError
 from langchain_core.runnables import RunnableConfig
 from test_sample import tavily_result1
-from pinecone import Pinecone
+from pinecone import init, Index
 
-pinecone_client = Pinecone(api_key=env_pinecone, environment=pinecone_environment)
+# Initialize Pinecone
+init(api_key=env_pinecone, environment=pinecone_environment)
+
+# Access the index
+index = Index(index_name)
 
 
 # Define GraphState including chat_history
