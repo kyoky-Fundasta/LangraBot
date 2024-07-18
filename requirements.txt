@@ -10,3 +10,4 @@ rag
 ipython
 graphviz
 text-tools
+pinecone-client
