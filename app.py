@@ -59,7 +59,7 @@ embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
 
 try:
     docsearch = PineconeVectorStore.from_existing_index(
-        index_name=index, embedding=embeddings
+        index_name=index_name, embedding=embeddings
     )
     retriever = docsearch.as_retriever(
         search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
