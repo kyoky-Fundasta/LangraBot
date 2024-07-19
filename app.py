@@ -39,14 +39,6 @@ from langchain_core.runnables import RunnableConfig
 from test_sample import tavily_result1
 from pinecone import Pinecone
 
-# Initialize Pinecone
-
-
-pinecone_client = Pinecone(api_key=env_pinecone)
-
-# Access the index
-index = pinecone_client.Index(index_name)
-
 
 # Define GraphState including chat_history
 class GraphState(TypedDict):
@@ -58,30 +50,38 @@ class GraphState(TypedDict):
     chat_history: list  # Added chat_history
 
 
-embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
-
-try:
-    os.environ["PINECONE_API_KEY"] = env_pinecone
-    docsearch = PineconeVectorStore.from_existing_index(
-        index_name=index_name, embedding=embeddings
-    )
-    retriever = docsearch.as_retriever(
-        search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
-    )
-    print("\n\n!!!!!Pinecone initialized successfully.!!!!!\n\n")
-except Exception as e:
-    print(f"\n\nError initializing Pinecone: {str(e)}, key : {env_pinecone[:5]}")
-    print(f"\n\nError initializing Pinecone: {str(e)}")
-    print(f"Error type: {type(e)}")
-    print(f"Pinecone API key (first 5 chars): {env_pinecone[:5]}")
-    print(f"Index name: {index_name}")
-    print(f"Traceback: {traceback.format_exc()}")
 os.environ["TAVILY_API_KEY"] = env_tavily
 model_name = "gpt-3.5-turbo-0125"
 
 
 #   RAG document retrieval
 def retrieve_document(state: GraphState) -> GraphState:
+
+    # Initialize Pinecone
+    pinecone_client = Pinecone(api_key=env_pinecone)
+
+    # Access the index
+    index = pinecone_client.Index(index_name)
+
+    embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
+
+    try:
+        os.environ["PINECONE_API_KEY"] = env_pinecone
+        docsearch = PineconeVectorStore.from_existing_index(
+            index_name=index_name, embedding=embeddings
+        )
+        retriever = docsearch.as_retriever(
+            search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
+        )
+        print("\n\n!!!!!Pinecone initialized successfully.!!!!!\n\n")
+    except Exception as e:
+        print(f"\n\nError initializing Pinecone: {str(e)}, key : {env_pinecone[:5]}")
+        print(f"\n\nError initializing Pinecone: {str(e)}")
+        print(f"Error type: {type(e)}")
+        print(f"Pinecone API key (first 5 chars): {env_pinecone[:5]}")
+        print(f"Index name: {index_name}")
+        print(f"Traceback: {traceback.format_exc()}")
+
     # Retrieves related refence from VectorDB
     retrieved_docs = retriever.invoke(state["question"])
     # Reshape the data
