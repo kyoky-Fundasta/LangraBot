@@ -8,7 +8,7 @@ st.title("💬 FundastA サポートデスク")
 st.caption("🤖 私は株式会社FundastAのAIアシストです。")
 st.title("test pinecone")
 if st.button("test pinecone"):
-    pinecone()
+    st.write(pinecone())
 
 menu_options = ["ChatGPT 3.5", "ChatGPT 4o", "Gemini", "Claude"]
 ai_bot = st.selectbox("LLM models", menu_options)

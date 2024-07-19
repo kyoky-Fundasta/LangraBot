@@ -61,6 +61,7 @@ def pinecone():
     )
     result = retriever.invoke("fundastaの育児休暇について?")
     print(result)
+    return result
 
 
 #   RAG document retrieval
