@@ -67,20 +67,15 @@ def pinecone():
 #   RAG document retrieval
 def retrieve_document(state: GraphState) -> GraphState:
 
-    # Initialize Pinecone
-    pinecone_client = Pinecone(api_key=env_pinecone)
-
-    # Access the index
-    index = pinecone_client.Index(index_name)
-
-    embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
-
     try:
+        os.environ["OPENAI_API_KEY"] = env_openai
         os.environ["PINECONE_API_KEY"] = env_pinecone
-        docsearch = PineconeVectorStore.from_existing_index(
+
+        embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
+        vectorstore = PineconeVectorStore.from_existing_index(
             index_name=index_name, embedding=embeddings
         )
-        retriever = docsearch.as_retriever(
+        retriever = vectorstore.as_retriever(
             search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
         )
         print("\n\n!!!!!Pinecone initialized successfully.!!!!!\n\n")
