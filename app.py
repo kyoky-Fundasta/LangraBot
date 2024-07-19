@@ -19,14 +19,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from rag.utils import format_docs, format_searched_docs
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings
-from const import (
-    env_openai,
-    index_name,
-    embedding_model,
-    env_tavily,
-    env_pinecone,
-    pinecone_environment,
-)
+from const import env_openai, index_name, embedding_model, env_tavily, env_pinecone
 from llm_chain import llm_chain, llm_chain_normal
 from langgraph.graph import END, StateGraph
 from langgraph.checkpoint.memory import MemorySaver
@@ -52,6 +45,22 @@ class GraphState(TypedDict):
 
 os.environ["TAVILY_API_KEY"] = env_tavily
 model_name = "gpt-3.5-turbo-0125"
+
+
+def pinecone():
+
+    os.environ["OPENAI_API_KEY"] = env_openai
+    os.environ["PINECONE_API_KEY"] = env_pinecone
+
+    embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
+    vectorstore = PineconeVectorStore.from_existing_index(
+        index_name=index_name, embedding=embeddings
+    )
+    retriever = vectorstore.as_retriever(
+        search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
+    )
+    result = retriever.invoke("fundastaの育児休暇について?")
+    print(result)
 
 
 #   RAG document retrieval

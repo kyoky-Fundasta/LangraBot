@@ -1,12 +1,14 @@
 import streamlit as st
-from app import chat
+from app import chat, pinecone
 
 
 # WebUI (Streamlit)
 st.set_page_config(layout="wide")
 st.title("💬 FundastA サポートデスク")
 st.caption("🤖 私は株式会社FundastAのAIアシストです。")
-
+st.title("test pinecone")
+if st.button("test pinecone"):
+    pinecone()
 
 menu_options = ["ChatGPT 3.5", "ChatGPT 4o", "Gemini", "Claude"]
 ai_bot = st.selectbox("LLM models", menu_options)
