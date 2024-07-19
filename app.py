@@ -39,6 +39,8 @@ from test_sample import tavily_result1
 from pinecone import Pinecone
 
 # Initialize Pinecone
+
+
 pinecone_client = Pinecone(api_key=env_pinecone)
 
 # Access the index
@@ -58,6 +60,7 @@ class GraphState(TypedDict):
 embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
 
 try:
+    os.environ["PINECONE_API_KEY"] = env_pinecone
     docsearch = PineconeVectorStore.from_existing_index(
         index_name=index_name, embedding=embeddings
     )
