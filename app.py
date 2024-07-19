@@ -1,6 +1,7 @@
 # %%
 import os
 import re
+import traceback
 
 from graphviz import Graph
 
@@ -70,8 +71,11 @@ try:
     print("\n\n!!!!!Pinecone initialized successfully.!!!!!\n\n")
 except Exception as e:
     print(f"\n\nError initializing Pinecone: {str(e)}, key : {env_pinecone[:5]}")
-
-
+    print(f"\n\nError initializing Pinecone: {str(e)}")
+    print(f"Error type: {type(e)}")
+    print(f"Pinecone API key (first 5 chars): {env_pinecone[:5]}")
+    print(f"Index name: {index_name}")
+    print(f"Traceback: {traceback.format_exc()}")
 os.environ["TAVILY_API_KEY"] = env_tavily
 model_name = "gpt-3.5-turbo-0125"
 
