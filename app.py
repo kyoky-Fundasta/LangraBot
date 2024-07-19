@@ -1,4 +1,5 @@
 # %%
+
 import os
 import re
 import traceback
@@ -45,23 +46,6 @@ class GraphState(TypedDict):
 
 os.environ["TAVILY_API_KEY"] = env_tavily
 model_name = "gpt-3.5-turbo-0125"
-
-
-def pinecone():
-
-    os.environ["OPENAI_API_KEY"] = env_openai
-    os.environ["PINECONE_API_KEY"] = env_pinecone
-
-    embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
-    vectorstore = PineconeVectorStore.from_existing_index(
-        index_name=index_name, embedding=embeddings
-    )
-    retriever = vectorstore.as_retriever(
-        search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
-    )
-    result = retriever.invoke("fundastaの育児休暇について?")
-    print(result)
-    return result
 
 
 #   RAG document retrieval

@@ -6,10 +6,6 @@ from app import chat, pinecone
 st.set_page_config(layout="wide")
 st.title("💬 FundastA サポートデスク")
 st.caption("🤖 私は株式会社FundastAのAIアシストです。")
-# st.title("test pinecone")
-# if st.button("test pinecone"):
-#     result = pinecone()
-#     st.write(result)
 
 
 menu_options = ["ChatGPT 3.5", "ChatGPT 4o", "Gemini", "Claude"]
