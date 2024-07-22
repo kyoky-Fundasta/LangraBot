@@ -2,105 +2,40 @@
 
 import os
 import re
-import traceback
 
-from graphviz import Graph
 
+# from graphviz import Digraph
+# from graphviz import Graph
 # import re
-
-from dotenv import load_dotenv
-from typing import TypedDict
+# from dotenv import load_dotenv
+# from typing import TypedDict
 
 # from langchain_upstage import UpstageGroundednessCheck
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from langchain_community.utilities.tavily_search import TavilySearchAPIWrapper
-from langchain_community.tools.tavily_search import TavilySearchResults
-from rag.utils import format_docs, format_searched_docs
-from langchain_pinecone import PineconeVectorStore
-from langchain_openai import OpenAIEmbeddings
-from const import env_openai, index_name, embedding_model, env_tavily, env_pinecone
-from llm_chain import llm_chain, llm_chain_normal
+from langchain_google_genai import ChatGoogleGenerativeAI
+from module.vector.pinecone import retrieve_document
+from module.web.tavily import search_on_web
+
+from data.const import (
+    env_openai,
+    env_genai,
+    index_name,
+    embedding_model,
+    env_tavily,
+    env_pinecone,
+    GraphState,
+    gpt_model_name,
+)
+from module.llm.get_response import advanced_question, normal_question
 from langgraph.graph import END, StateGraph
 from langgraph.checkpoint.memory import MemorySaver
-
 from IPython.display import Image, display
-from graphviz import Digraph
+
 import pprint
 from langgraph.errors import GraphRecursionError
 from langchain_core.runnables import RunnableConfig
-from test_sample import tavily_result1
-from pinecone import Pinecone
-
-
-# Define GraphState including chat_history
-class GraphState(TypedDict):
-    question: str
-    answer: str
-    context: str
-    web: str
-    relevance: str
-    chat_history: list  # Added chat_history
-
-
-os.environ["TAVILY_API_KEY"] = env_tavily
-model_name = "gpt-3.5-turbo-0125"
-
-
-#   RAG document retrieval
-def retrieve_document(state: GraphState) -> GraphState:
-
-    try:
-        os.environ["OPENAI_API_KEY"] = env_openai
-        os.environ["PINECONE_API_KEY"] = env_pinecone
-
-        embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
-        vectorstore = PineconeVectorStore.from_existing_index(
-            index_name=index_name, embedding=embeddings
-        )
-        retriever = vectorstore.as_retriever(
-            search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
-        )
-        print("\n\n!!!!!Pinecone initialized successfully.!!!!!\n\n")
-    except Exception as e:
-        print(f"\n\nError initializing Pinecone: {str(e)}, key : {env_pinecone[:5]}")
-        print(f"\n\nError initializing Pinecone: {str(e)}")
-        print(f"Error type: {type(e)}")
-        print(f"Pinecone API key (first 5 chars): {env_pinecone[:5]}")
-        print(f"Index name: {index_name}")
-        print(f"Traceback: {traceback.format_exc()}")
-
-    # Retrieves related refence from VectorDB
-    retrieved_docs = retriever.invoke(state["question"])
-    # Reshape the data
-    retrieved_docs = format_docs(retrieved_docs)
-    # Preserve it in a GraphState
-    return GraphState(
-        question=state["question"],
-        answer=state["answer"],
-        context=retrieved_docs,
-        chat_history=state["chat_history"],
-        web=state["web"],
-        relevance=state["relevance"],
-    )
-
-
-# Generate an answer using LLM
-def llm_answer(state: GraphState) -> GraphState:
-    # Generate AI answer
-    response_state = llm_chain(state, model_name)
-    print("\n\n@@@@@@@@@@@@@@@@@@@", response_state)
-    answer = "".join(response_state["answer"])
-    print("####################", answer)
-    return GraphState(
-        question=state["question"],
-        answer=answer,
-        context=state["context"],
-        chat_history=state["chat_history"],
-        web=state["web"],
-        relevance=state["relevance"],
-    )
 
 
 # Rewrite the user question
@@ -130,7 +65,7 @@ def rewrite(state: GraphState) -> GraphState:
     )
 
     # Question rewriting model
-    model = ChatOpenAI(temperature=0, model=model_name, openai_api_key=env_openai)
+    model = ChatOpenAI(temperature=0, model=gpt_model_name, openai_api_key=env_openai)
     chain = prompt | model | StrOutputParser()
     response = chain.invoke(
         {
@@ -146,31 +81,6 @@ def rewrite(state: GraphState) -> GraphState:
         context=state["context"],
         chat_history=chat_history,
         web=state["web"],
-        answer=state["answer"],
-        relevance=state["relevance"],
-    )
-
-
-# Web search API
-def search_on_web(state: GraphState) -> GraphState:
-    # Tavily web search
-    search = TavilySearchAPIWrapper()
-    search_tool = TavilySearchResults(max_results=4, api_wrapper=search)
-    search_result = search_tool.invoke({"query": state["question"]})
-
-    # # Test data for saving tavily search api
-    # search_result = tavily_result1
-
-    # print("##Tavily:", search_result)
-    # Reshape the search_result
-    search_result = format_searched_docs(search_result)
-    # Preserve it in the state.
-    # print("\n\n##Tavily2:", search_result)
-    return GraphState(
-        question=state["question"],
-        context=state["context"],
-        web=search_result,
-        chat_history=state["chat_history"],
         answer=state["answer"],
         relevance=state["relevance"],
     )
@@ -199,7 +109,7 @@ def relevance_check(state: GraphState) -> GraphState:
         ]
     )
 
-    model = ChatOpenAI(temperature=0, model=model_name, openai_api_key=env_openai)
+    model = ChatOpenAI(temperature=0, model=gpt_model_name, openai_api_key=env_openai)
     chain = prompt | model | StrOutputParser()
     response = chain.invoke({"question": state["question"], "answer": state["answer"]})
     print("Check response :", response)
@@ -233,7 +143,7 @@ def relevance_check_first(state: GraphState) -> GraphState:
         ]
     )
 
-    model = ChatOpenAI(temperature=0, model=model_name, openai_api_key=env_openai)
+    model = ChatOpenAI(temperature=0, model=gpt_model_name, openai_api_key=env_openai)
     chain = prompt | model | StrOutputParser()
     response = chain.invoke({"question": state["question"]})
 
@@ -278,13 +188,13 @@ def chat(user_question, chat_history):
         flag_1 = "FundastA question"
 
     if relevance_state["relevance"] == "No":
-        initial_answer_state = llm_chain_normal(initial_state, model_name)
+        initial_answer_state = normal_question(initial_state, gpt_model_name)
         return initial_answer_state["answer"][0]
     elif relevance_state["relevance"] == "Yes":
         # Node definition
         workflow.add_node("retrieve", retrieve_document)
-        workflow.add_node("llm_answer", llm_answer)
-        workflow.add_node("llm_answer_continue", llm_answer)
+        workflow.add_node("llm_answer", advanced_question)
+        workflow.add_node("llm_answer_continue", advanced_question)
         workflow.add_node("rewrite", rewrite)
         workflow.add_node("search_on_web", search_on_web)
         workflow.add_node("relevance_check", relevance_check)
@@ -322,17 +232,17 @@ def chat(user_question, chat_history):
         app = workflow.compile(checkpointer=memory)
 
         #   Draw a diagram describing reasoning flow
-        # try:
-        #     graph = app.get_graph(xray=True)
-        #     # Using draw_mermaid_png to render the graph
-        #     png_bytes = graph.draw_mermaid_png()
-        #     if png_bytes:
-        #         # Display the graph
-        #         display(Image(png_bytes))
-        #     else:
-        #         print("No PNG bytes generated")
-        # except Exception as e:
-        #     print(f"An error occurred: {e}")
+        try:
+            graph = app.get_graph(xray=True)
+            # Using draw_mermaid_png to render the graph
+            png_bytes = graph.draw_mermaid_png()
+            if png_bytes:
+                # Display the graph
+                display(Image(png_bytes))
+            else:
+                print("No PNG bytes generated")
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
         config = RunnableConfig(
             recursion_limit=12, configurable={"thread_id": "CORRECTIVE-SEARCH-RAG"}
@@ -393,12 +303,6 @@ if __name__ == "__main__":
     chat_history = []  # Initialize chat history
     question_1 = "FundastAの資本金はいくらですか"
     answer_1 = chat(question_1, chat_history)
-    # chat_history.append((question_1, answer_1))
-    # print(answer_1)
 
-    # question_2 = "私の名前はなあに？"
-    # answer_2 = chat(question_2, chat_history)
-    # chat_history.append((question_2, answer_2))
-    # print(answer_2)
 
 # %%

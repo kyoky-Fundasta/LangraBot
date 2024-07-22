@@ -8,8 +8,10 @@ st.title("💬 FundastA サポートデスク")
 st.caption("🤖 私は株式会社FundastAのAIアシストです。")
 
 
-menu_options = ["ChatGPT 3.5", "ChatGPT 4o", "Gemini", "Claude"]
-ai_bot = st.selectbox("LLM models", menu_options)
+menu_options = ["ChatGPT 3.5", "Gemini 1.5 Flash", "Claude"]
+login_options = ["FundastA社員", "Guest"]
+model = st.selectbox("LLM models", menu_options)
+who = st.selectbox("Log-in options", login_options)
 
 st.sidebar.title("MENU")
 ai_bot = st.sidebar.radio("", ["チャットで質問", "メールで問い合わせ", "資料検索"])
@@ -29,7 +31,10 @@ if ai_bot == "チャットで質問":
 
         with st.spinner("🤖 考え中......"):
             ai_answer = chat(
-                user_question=prompt, chat_history=st.session_state["chat_history"]
+                user_question=prompt,
+                chat_history=st.session_state["chat_history"],
+                model_name=model,
+                who=who,
             )
             # # pages = [
             # #     str(int(doc.metadata.get("page-number")))

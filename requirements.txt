@@ -5,8 +5,12 @@ langchain-pinecone
 langchain-upstage
 langchain-community
 langgraph
-rag
 ipython
-graphviz
 text-tools
-pinecone
+langchain-google-genai==0.0.6
+blinker
+typing_extensions
+protobuf
+cachetools
+toml
+yaml

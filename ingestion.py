@@ -1,7 +1,7 @@
 from text_tools import load_pdf, chunk_text
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
-from const import env_openai, embedding_model, index_name
+from data.const import env_openai, embedding_model, index_name
 
 
 if __name__ == "__main__":
