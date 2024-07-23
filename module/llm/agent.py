@@ -53,7 +53,7 @@ def ai_agent(selected_model, user_input):
         tools=tools,
         handle_parsing_errors=True,
         verbose=True,
-        max_iterations=2,
+        max_iterations=3,
     )
 
     # user_input = input("Enter your question :")
