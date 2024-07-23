@@ -12,7 +12,7 @@ os.environ["TAVILY_API_KEY"] = env_tavily
 def search_on_web(state: GraphState) -> GraphState:
     # Tavily web search
     search = TavilySearchAPIWrapper()
-    search_tool = TavilySearchResults(max_results=4, api_wrapper=search)
+    search_tool = TavilySearchResults(max_results=6, api_wrapper=search)
     search_result = search_tool.invoke({"query": state["question"]})
 
     # # Test data for saving tavily search api fee

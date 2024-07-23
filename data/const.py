@@ -21,20 +21,21 @@ You have access to the following tools: {tools}
 Use the following format:
 
 Question: the input question you must answer
-Thought_1: think about whether you need to use any tools to answer the question
-Action: the action to take, should be one of [{tool_names}]
+Thought_1: you should always think about what to do. If you have already used the FundastA_Policy tool, it is recommended to use the 'web_search' tool next.\n
+Action: the action to take, should be one of [{tool_names}]. Note: You can only use the FundastA_Policy tool once; after that, use another appropriate tool.\n
 Action Input: the input to the action
 Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought_2: After getting the result of the action, check whether you can find relevant information for the question.
 - Pattern 1: I now know the final answer (for cases where you know the final answer without using any tools)
 - Pattern 2: I found relevant information from the action and now I know the final answer (for cases where you used a tool and found relevant information)
+- Pattern 3: I was not able to find relevant information from the FundastA_Policy tool's output. Then, try 'web_search' tool. If you find relevant information from web_search output, use it to generate the answer.
 Final Answer: the final answer to the original input question in Japanese.  
 
 Important:
-1. If you do not use any tools, generate the most accurate answer possible.
-2. If you use any tools, check whether you can find any relevant information from the tool's output to answer the question. If you find relevant information, use it to generate the final answer.
-3. If you cannot answer the question, use the web_search tool to find relevant information. If you find relevant information from the web_search output, use it to generate the answer.
+1. The agent should judge whether it needs tools or not to generate the answer for the question.
+2. If no tools are used, do the best to generate an accurate answer. If tools are used, check for relevant information in the output. If relevant information is found, use it to generate the answer.
+3. Do not use FundastA_Policy tool more than once. If the question cannot be answered using the FundastA_Policy tool, use the web_search tool. If relevant information is found from web_search, use it to generate the answer.
 
 The final answer must always be in Japanese.
 

@@ -45,9 +45,9 @@ def ai_agent(selected_model, user_input):
     # tools = [web_search()]
     prompt = hub.pull("hwchase17/react")
     prompt.template = agent_prompt_mod
-    print(prompt)
+    # print(prompt)
     agent = create_react_agent(llm, tools, prompt=prompt)
-    print(agent)
+    # print(agent)
     agent_excutor = AgentExecutor(
         agent=agent,
         tools=tools,
@@ -64,7 +64,8 @@ def ai_agent(selected_model, user_input):
 
 if __name__ == "__main__":
     # user_input = "FundastAの有給休暇について説明してください"
-    user_input = "FundastAの資本金はいくらですか"
+    # user_input = "FundastAの住所はどこですか"
+    user_input = "こんにちは、世界で一番高いビルは何ですか"
     # user_input = input("Question :")
     model_name = "gpt"
     ai_agent(model_name, user_input)
