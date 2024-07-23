@@ -27,10 +27,11 @@ Observation: the result of the action\n
 Thought_2: After getting the result of the action, you must check whether you can find relevant information for the question.
 - Pattern 1: I now know the final answer (For the case you know the final answer without using any tools)
 - Pattern 2: I found relevant information from the action and now I know the final answer (For the case you used a tool and found relevant information)
-Final Answer: the final answer to the original input question in Japanese. It is \n\n
+Final Answer: the final answer to the original input question in Japanese.  \n\n
 Important:
 1. If you did not use any tools, generate a general answer.
 2. When you used a tool, you must check whether you can find any relevant information from the tool's output for the question. If you find any relevant information, you must use it to generate the final answer.
+3. If you are not able to answer the question, use the web_search tool to find the information.
 
 The final answer must always be in Japanese.
 

@@ -11,6 +11,7 @@ from data.const import (
     agent_prompt_mod,
 )
 from module.vector.pineconeDB import retrieve_document, FundastA_Policy
+from module.web.tavily import web_search
 from module.web.tavily import search_on_web
 from data.const import env_genai
 from langchain.prompts import PromptTemplate
@@ -27,28 +28,43 @@ test_state = GraphState(
     chat_history=[],
 )
 
-# llm = ChatGoogleGenerativeAI(
-#     model=gemini_model_name,
-#     google_api_key=env_genai,
-#     temperature=0,
-#     convert_system_message_to_human=True,
-# )
 
-llm = ChatOpenAI(temperature=0, model=gpt_model_name, openai_api_key=env_openai)
+def ai_agent(selected_model, user_input):
 
-tools = [FundastA_Policy()]
+    if selected_model == "gemini":
+        llm = ChatGoogleGenerativeAI(
+            model=gemini_model_name,
+            google_api_key=env_genai,
+            temperature=0,
+            convert_system_message_to_human=True,
+        )
+    elif selected_model == "gpt":
+        llm = ChatOpenAI(temperature=0, model=gpt_model_name, openai_api_key=env_openai)
 
-prompt = hub.pull("hwchase17/react")
-prompt.template = agent_prompt_mod
+    tools = [FundastA_Policy(), web_search()]
+    # tools = [web_search()]
+    prompt = hub.pull("hwchase17/react")
+    prompt.template = agent_prompt_mod
+    print(prompt)
+    agent = create_react_agent(llm, tools, prompt=prompt)
+    print(agent)
+    agent_excutor = AgentExecutor(
+        agent=agent,
+        tools=tools,
+        handle_parsing_errors=True,
+        verbose=True,
+        max_iterations=2,
+    )
+
+    # user_input = input("Enter your question :")
+
+    output = agent_excutor.invoke({"input": user_input})
+    print(output, type(output))
 
 
-agent = create_react_agent(llm, tools, prompt=prompt)
-
-agent_excutor = AgentExecutor(
-    agent=agent, tools=tools, handle_parsing_errors=True, verbose=True, max_iterations=2
-)
-
-# user_input = input("Enter your question :")
-user_input = "FundastAの有給休暇について説明してください"
-output = agent_excutor.invoke({"input": user_input})
-print(output, type(output))
+if __name__ == "__main__":
+    # user_input = "FundastAの有給休暇について説明してください"
+    user_input = "FundastAの資本金はいくらですか"
+    # user_input = input("Question :")
+    model_name = "gpt"
+    ai_agent(model_name, user_input)

@@ -79,7 +79,7 @@ class FundastA_Policy(BaseTool):
         # Reshape the data
         retrieved_docs = format_docs(retrieved_docs)
 
-        return retrieved_docs + "\n"
+        return "\n\n" + retrieved_docs + "\n\n"
 
     def _arun(self, input_str: str):
         raise NotImplementedError("Async method not implemented")
