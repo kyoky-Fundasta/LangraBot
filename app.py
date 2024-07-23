@@ -162,7 +162,7 @@ def is_relevant(state: GraphState) -> GraphState:
 
 
 # if __name__ == "__main__":
-def chat(user_question, chat_history):
+def chat(user_question, chat_history, model_name, who):
     workflow = StateGraph(GraphState)
 
     # Generate answer with LLM
@@ -175,8 +175,15 @@ def chat(user_question, chat_history):
         chat_history=chat_history,
     )
 
+    if who == "Guest":
+        final_answer = normal_question(initial_state, model_name)
+        return final_answer + "👦Responded to the Guest"
+
+    elif who == "FundastA_社員":
+        pass
+
     # Conduct relevance check by exact company name
-    relevance_state = relevance_check_first(initial_state)
+    eval_question = relevance_check_first(user_question, who)
     # if "FundastA" in user_question:
     #     relevance_state["relevance"] = "Yes"
 
@@ -188,7 +195,7 @@ def chat(user_question, chat_history):
         flag_1 = "FundastA question"
 
     if relevance_state["relevance"] == "No":
-        initial_answer_state = normal_question(initial_state, gpt_model_name)
+        initial_answer_state = normal_question(initial_state, model_name)
         return initial_answer_state["answer"][0]
     elif relevance_state["relevance"] == "Yes":
         # Node definition

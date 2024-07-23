@@ -12,7 +12,7 @@ def search_on_web(state: GraphState) -> GraphState:
     # Tavily web search
     search = TavilySearchAPIWrapper()
     search_tool = TavilySearchResults(max_results=4, api_wrapper=search)
-    search_result = search_tool.invoke({"query": state["question"]})
+    search_result = search_tool.invoke({"query": user_question})
 
     # # Test data for saving tavily search api
     # search_result = tavily_result1
@@ -22,6 +22,7 @@ def search_on_web(state: GraphState) -> GraphState:
     search_result = format_searched_docs(search_result)
 
     # Preserve it in the state.
+    return search_result
     return GraphState(
         question=state["question"],
         context=state["context"],

@@ -1,4 +1,5 @@
 python-dotenv
+langchain
 langchain-core
 langchain-openai
 langchain-pinecone
@@ -8,9 +9,9 @@ langgraph
 ipython
 text-tools
 langchain-google-genai==0.0.6
-blinker
-typing_extensions
-protobuf
-cachetools
-toml
-yaml
+# blinker
+# typing_extensions
+# protobuf
+# cachetools
+# toml
+# yaml
