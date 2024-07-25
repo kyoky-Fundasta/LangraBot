@@ -15,7 +15,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
-from module.vector.pinecone import retrieve_document
+# from module.vector.pinecone import retrieve_document
 from module.web.tavily import search_on_web
 
 from data.const import (
@@ -36,7 +36,7 @@ from IPython.display import Image, display
 import pprint
 from langgraph.errors import GraphRecursionError
 from langchain_core.runnables import RunnableConfig
-
+from module.llm.my_agent import ai_agent
 
 # Rewrite the user question
 def rewrite(state: GraphState) -> GraphState:
@@ -176,29 +176,16 @@ def chat(user_question, chat_history, model_name, who):
     )
 
     if who == "Guest":
-        final_answer = normal_question(initial_state, model_name)
-        return final_answer + "👦Responded to the Guest"
+        final_answer = normal_question(model_name, initial_state)
+        return final_answer + "\n👦 Guest mode"
 
     elif who == "FundastA_社員":
-        pass
+        angent_answer = ai_agent(model_name, initial_state)
 
-    # Conduct relevance check by exact company name
+
     eval_question = relevance_check_first(user_question, who)
-    # if "FundastA" in user_question:
-    #     relevance_state["relevance"] = "Yes"
 
-    # Conduct relevance check by Regular Expression pattern check : Not yet Test
-    pattern = re.compile(r"fundasta", re.IGNORECASE)
-    flag_1 = "Ordinary Question"
-    if pattern.search(user_question):
-        relevance_state["relevance"] = "Yes"
-        flag_1 = "FundastA question"
 
-    if relevance_state["relevance"] == "No":
-        initial_answer_state = normal_question(initial_state, model_name)
-        return initial_answer_state["answer"][0]
-    elif relevance_state["relevance"] == "Yes":
-        # Node definition
         workflow.add_node("retrieve", retrieve_document)
         workflow.add_node("llm_answer", advanced_question)
         workflow.add_node("llm_answer_continue", advanced_question)

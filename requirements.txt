@@ -9,6 +9,7 @@ langgraph
 ipython
 text-tools
 langchain-google-genai==0.0.6
+base_agent
 # blinker
 # typing_extensions
 # protobuf

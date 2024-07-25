@@ -36,19 +36,19 @@ def search_on_web(state: GraphState) -> GraphState:
 class web_search(BaseTool):
     name: str = "web_search"
     description: str = (
-        """ウェブ検索をしてユーザーの質問に答えることが出来ます。
+        """ウェブの情報を検索してユーザーの質問に答えることが出来ます。
         以下の時にはこのツールを使ってください。
         １．Fundasta_policyツールを使ったがユーザーの質問に答えることが出来なかった。
         ２．ユーザーがリアルタイム情報について質問をした。
         ３．ユーザーがLLMがまだ学習をしていない最近の情報について質問をした。
-        ４．ユーザーの質問に答えることが出来なかった場合最後にこのツールを使ってみてください
+        ４．他のツールでユーザーの質問に答えることが出来なかった時、最後にこのツールを使ってみてください
         """
     )
 
     def _run(self, input_str: str):
 
         search = TavilySearchAPIWrapper()
-        search_tool = TavilySearchResults(max_results=4, api_wrapper=search)
+        search_tool = TavilySearchResults(max_results=8, api_wrapper=search)
         search_result = search_tool.invoke({"query": input_str})
 
         search_result = format_searched_docs(search_result)
