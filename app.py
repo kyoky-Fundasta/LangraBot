@@ -166,7 +166,7 @@ def chat(user_question, chat_history, model_name, who):
     workflow = StateGraph(GraphState)
 
     # Generate answer with LLM
-    initial_state = GraphState(
+    chat_state = GraphState(
         question=user_question,
         context="",
         web="",
@@ -176,11 +176,11 @@ def chat(user_question, chat_history, model_name, who):
     )
 
     if who == "Guest":
-        final_answer = normal_question(model_name, initial_state)
+        final_answer = normal_question(model_name, chat_state)
         return final_answer + "\n👦 Guest mode"
 
     elif who == "FundastA_社員":
-        angent_answer = ai_agent(model_name, initial_state)
+        chat_state_agent = ai_agent(model_name, chat_state)
 
 
     eval_question = relevance_check_first(user_question, who)

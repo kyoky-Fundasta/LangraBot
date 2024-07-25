@@ -49,7 +49,7 @@ Thought: {agent_scratchpad}
 """
 
 
-# GraphState is a TypedDict that defines the structure of the  graph state
+# GraphState is a TypedDict that defines the structure of the graph state
 class GraphState(TypedDict):
     question: str
     answer: str

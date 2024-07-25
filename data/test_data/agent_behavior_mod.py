@@ -10,8 +10,8 @@ from data.const import (
     agent_prompt_mod,
 )
 
-from module.vector.pineconeDB import FundastA_Policy
-from module.web.tavily import web_search
+# from module.vector.pineconeDB import FundastA_Policy
+# from module.web.tavily import web_search
 from data.const import env_genai
 from langchain_openai import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
@@ -26,53 +26,64 @@ from uuid import UUID
 # Check the line no 123 and DynamicPromptCallback class
 
 
-# class FundastA_Policy(BaseTool):
-#     name: str = "FundastA_Policy"
-#     description: str = (
-#         """FundastAの就業規則の内容が確認できるツールです。
-#     ユーザーがFundastAについて質問している場合、特に就業規則について
-#     質問しているときに、関連する内容を捜すことが出来ます。関連する内容が
-#     あった場合にはそれを使ってユーザーの質問に答えてください。
-#     このツールは一つの質問に対して一回だけ使えます。
-#     一度使ったらほかのツールを使って関連情報を検索してください。"""
-#     )
+# Mock function 1
+class FundastA_Policy(BaseTool):
+    name: str = "FundastA_Policy"
+    description: str = (
+        """FundastAの就業規則の内容が確認できるツールです。
+    ユーザーがFundastAについて質問している場合、特に就業規則について
+    質問しているときに、関連する内容を捜すことが出来ます。関連する内容が
+    あった場合にはそれを使ってユーザーの質問に答えてください。
+    このツールは一つの質問に対して一回だけ使えます。
+    一度使ったらほかのツールを使って関連情報を検索してください。"""
+    )
 
-#     def _run(self, input_str: str) -> str:
+    def _run(self, input_str: str) -> str:
 
-#         result = "FundastAの社員数の情報がありません"
+        result = "FundastAの社員数の情報がありません"
+        # if self.callbacks:
+        #     for callback in self.callbacks:
+        #         if hasattr(callback, "on_text"):
+        #             callback.on_text(result, run_id=None)
+        return "\n\n" + result + "\n\n"
 
-#         return "\n\n" + result + "\n\n"
-
-#     def _arun(self, input_str: str):
-#         raise NotImplementedError("Async method not implemented")
+    def _arun(self, input_str: str):
+        raise NotImplementedError("Async method not implemented")
 
 
-# class web_search(BaseTool):
-#     name: str = "web_search"
-#     description: str = (
-#         """ウェブの情報を検索してユーザーの質問に答えることが出来ます。
-#         以下の時にはこのツールを使ってください。
-#         １．Fundasta_policyツールを使ったがユーザーの質問に答えることが出来なかった。
-#         ２．ユーザーがリアルタイム情報について質問をした。
-#         ３．ユーザーがLLMがまだ学習をしていない最近の情報について質問をした。
-#         ４．他のツールでユーザーの質問に答えることが出来なかった時、最後にこのツールを使ってみてください
-#         """
-#     )
+# Mock function 2
+class web_search(BaseTool):
+    name: str = "web_search"
+    description: str = (
+        """ウェブの情報を検索してユーザーの質問に答えることが出来ます。
+        以下の時にはこのツールを使ってください。
+        １．Fundasta_policyツールを使ったがユーザーの質問に答えることが出来なかった。
+        ２．ユーザーがリアルタイム情報について質問をした。
+        ３．ユーザーがLLMがまだ学習をしていない最近の情報について質問をした。
+        ４．他のツールでユーザーの質問に答えることが出来なかった時、最後にこのツールを使ってみてください
+        """
+    )
 
-# def _run(self, input_str: str):
+    def _run(self, input_str: str):
 
-#     result = "FundastAの社員数は14人です"
-#     return "\n\n" + result + "\n\n"
+        result = "FundastAの社員数は14人です"
+        # if self.callbacks:
+        #     for callback in self.callbacks:
+        #         if hasattr(callback, "on_text"):
+        #             callback.on_text(result, run_id=None)
+        return "\n\n" + result + "\n\n"
 
-# def _arun(self, input_str: str):
-#     raise NotImplementedError("Async method not implemented")
+    def _arun(self, input_str: str):
+        raise NotImplementedError("Async method not implemented")
 
 
 class DynamicPromptCallback(BaseCallbackHandler):
     def __init__(self, agent):
+        super().__init__()
         print("DynamicPromptCallback initialized")
         self.agent = agent
         self.fundasta_used = False
+        self.tool_outputs = []
 
     def update_prompt(self):
         print("\n\n-----------Trigger 2-------------\n\n")
@@ -108,11 +119,36 @@ class DynamicPromptCallback(BaseCallbackHandler):
         elif action.tool == "FundastA_Policy" and self.fundasta_used:
             self.update_action(action)
 
-    def on_agent_finish(self, finish, **kwargs):
-        print("\n\n--------------Agent finished-----------------\n\n")
+    # def on_tool_start(
+    #     self, serialized: Dict[str, Any], input_str: str, **kwargs
+    # ) -> None:
+
+    #     print("\n\n-----------Tool started----------------")
+    #     print(f"\n\nTool started: {serialized['name']}")
+    #     print(f"Input: {input_str}")
+
+    def on_tool_end(self, output: str, **kwargs) -> None:
+
+        print("\n\n-----------Tool ended----------------")
+        print(f"\n\n{kwargs['name']} Tool ended. Output: {output}")
+        self.tool_outputs.append({kwargs["name"]: output})
+
+    # def on_text(self, text: str, **kwargs) -> None:
+    #     """Run when agent ends."""
+    #     print("\n\n-------------text-----------------\n\n")
+    #     print(f"\n\nText: {text}")
 
 
 def ai_agent(selected_model, user_input):
+
+    chat_state = GraphState(
+        question=user_input,
+        context="",
+        web="",
+        answer="",
+        relevance="",
+        chat_history=[],
+    )
 
     if selected_model == "gemini":
         llm = ChatGoogleGenerativeAI(
@@ -124,25 +160,41 @@ def ai_agent(selected_model, user_input):
     elif selected_model == "gpt":
         llm = ChatOpenAI(temperature=0, model=gpt_model_name, openai_api_key=env_openai)
     # When creating the AgentExecutor:
-    tools = [FundastA_Policy, web_search]
+
     prompt = hub.pull("hwchase17/react")
     prompt.template = agent_prompt_mod
-    tools = [FundastA_Policy(), web_search()]
+    # tools = [FundastA_Policy(), web_search()]
+    # agent = create_react_agent(llm, tools, prompt=prompt)
+    dynamic_callback = DynamicPromptCallback(None)
+    tools = [
+        FundastA_Policy(callbacks=[dynamic_callback]),
+        web_search(callbacks=[dynamic_callback]),
+    ]
+
+    # Create the agent with the tools
     agent = create_react_agent(llm, tools, prompt=prompt)
-    dynamic_callback = DynamicPromptCallback(agent)
+
+    # Now update the callback with the agent
+    dynamic_callback.agent = agent
     print("Callback created")
+
     agent_executor = AgentExecutor(
         agent=agent,
         tools=tools,
         handle_parsing_errors=True,
         verbose=True,
         max_iterations=3,
-        return_intermediate_steps=False,
+        return_intermediate_steps=True,
         callbacks=[dynamic_callback],
     )
-
-    output = agent_executor.invoke({"question": user_input})
-    print(output, type(output))
+    agent_final_answer = agent_executor.invoke({"question": user_input})
+    chat_state["answer"] = final_answer
+    for output in dynamic_callback.tool_outputs:
+        if "FundastA_Policy" in output:
+            chat_state["context"] = output["FundastA_Policy"]
+        elif "web_search" in output:
+            chat_state["web"] = output["web_search"]
+    print(chat_state)
 
 
 if __name__ == "__main__":

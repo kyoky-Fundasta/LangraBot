@@ -52,7 +52,7 @@ class web_search(BaseTool):
         search_result = search_tool.invoke({"query": input_str})
 
         search_result = format_searched_docs(search_result)
-        print("\n\nClass :", type(search_result), search_result)
+        # print("\n\nClass :", type(search_result), search_result)
         return "\n\n" + search_result + "\n\n"
 
     def _arun(self, input_str: str):
@@ -77,4 +77,4 @@ if __name__ == "__main__":
     # Using the class
     tool = web_search()
     result = tool._run(state["question"])
-    print("\n\nClass :", type(result), result)
+    # print("\n\nClass :", type(result), result)

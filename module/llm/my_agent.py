@@ -21,43 +21,51 @@ from langchain.callbacks.base import BaseCallbackHandler
 
 class DynamicPromptCallback(BaseCallbackHandler):
     def __init__(self, agent):
-        print("DynamicPromptCallback initialized")
+        super().__init__()
         self.agent = agent
         self.fundasta_used = False
+        self.tool_outputs = []
+        self.tool_counter = 1
 
     def update_prompt(self):
-        print("\n\n-----------Trigger 2-------------\n\n")
         self.agent.get_prompts()[0].partial_variables[
             "tools"
         ] = "web_search: ウェブの情報を検索してユーザーの質問に答えることが出来ます。\n        以下の時にはこのツールを使ってください。\n        １．Fundasta_policyツールを使ったがユーザーの質問に答えることが出来なかった。\n        ２．ユーザーがリアルタイム情報について質問をした。\n        ３．ユーザーがLLMがまだ学習をしていない最近の情報について質問をした。\n        ４．他のツールでユーザーの質問に答えることが出来なかった時、最後にこのツールを使ってみてください\n        "
         self.agent.get_prompts()[0].partial_variables["tool_names"] = "web_search"
-        print(
-            "New prompt:\n" + self.agent.get_prompts()[0].partial_variables["tools"],
-            "\ntool_names:",
-            self.agent.get_prompts()[0].partial_variables["tool_names"],
-        )
+        print("\n----------------allowed toll list updated------------------\n")
+        # print(
+        #     "New prompt:\n" + self.agent.get_prompts()[0].partial_variables["tools"],
+        #     "\ntool_names:",
+        #     self.agent.get_prompts()[0].partial_variables["tool_names"],
+        # )
 
     def update_action(self, action):
-        print("\n----------------Action modification-------------------\n")
+        print("\n----------------Agent Action modified-------------------\n")
         action.tool = "web_search"
         input = action.tool_input
         action.log = f"Thought_2: I was not able to find relevant information from the FundastA_Policy tool's output. Then, try 'web_search' tool. If you find relevant information from web_search output, use it to generate the answer.\n\nAction: web_search\n\nAction Input: {input}\n"
 
     def on_agent_action(self, action, **kwargs):
-        print(
-            "\n\nOld prompt:\n"
-            + self.agent.get_prompts()[0].partial_variables["tools"],
-            "\ntool_names:",
-            self.agent.get_prompts()[0].partial_variables["tool_names"],
-        )
-        print(f"\nAgent action: {action}")
+        # print(
+        #     "\n\nOld prompt:\n"
+        #     + self.agent.get_prompts()[0].partial_variables["tools"],
+        #     "\ntool_names:",
+        #     self.agent.get_prompts()[0].partial_variables["tool_names"],
+        # )
+        # print(f"\nAgent action: {action}")
 
         if action.tool == "FundastA_Policy" and not self.fundasta_used:
-            print("\n\n-----------Trigger 1-------------\n\n")
             self.fundasta_used = True
             self.update_prompt()
         elif action.tool == "FundastA_Policy" and self.fundasta_used:
             self.update_action(action)
+
+    def on_tool_end(self, output: str, **kwargs) -> None:
+
+        print(f"\n\n-----------#{self.tool_counter} : Tool ended----------------\n")
+        self.tool_counter += 1
+        # print(f"\n\n{kwargs['name']} Tool ended. Output: {output}")
+        self.tool_outputs.append({kwargs["name"]: output})
 
 
 def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
@@ -71,14 +79,18 @@ def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
         )
     elif selected_model == "gpt":
         llm = ChatOpenAI(temperature=0, model=gpt_model_name, openai_api_key=env_openai)
-    # When creating the AgentExecutor:
-    tools = [FundastA_Policy, web_search]
+
     prompt = hub.pull("hwchase17/react")
     prompt.template = agent_prompt_mod
-    tools = [FundastA_Policy(), web_search()]
+
+    dynamic_callback = DynamicPromptCallback(None)
+    tools = [
+        FundastA_Policy(callbacks=[dynamic_callback]),
+        web_search(callbacks=[dynamic_callback]),
+    ]
     agent = create_react_agent(llm, tools, prompt=prompt)
-    dynamic_callback = DynamicPromptCallback(agent)
-    print("Callback created")
+    dynamic_callback.agent = agent
+
     agent_executor = AgentExecutor(
         agent=agent,
         tools=tools,
@@ -87,12 +99,16 @@ def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
         max_iterations=3,
         return_intermediate_steps=False,
         callbacks=[dynamic_callback],
-        early_stopping_method="generate",
     )
-    # chat_state["answer"] = agent_executor.invoke({"question": chat_state["question"]})
-    # print("\nOutput State by agent :\n" + chat_state)
-    output = agent_executor.invoke({"question": user_input})
-    print(output, type(output))
+    agent_final_answer = agent_executor.invoke({"question": user_input})
+
+    chat_state["answer"] = agent_final_answer["output"]
+    for output in dynamic_callback.tool_outputs:
+        if "FundastA_Policy" in output:
+            chat_state["context"] = output["FundastA_Policy"]
+        elif "web_search" in output:
+            chat_state["web"] = output["web_search"]
+    print(chat_state)
 
     return chat_state
 
@@ -102,5 +118,14 @@ if __name__ == "__main__":
     user_input = "FundastAの社員数は何人ですか"
     # user_input = "こんにちは、世界で一番高いビルは何ですか"
     # user_input = input("Question :")
+    test_state = GraphState(
+        question=user_input,
+        context="",
+        web="",
+        answer="",
+        relevance="",
+        chat_history=[],
+    )
+
     model_name = "gemini"
-    ai_agent(model_name, user_input)
+    ai_agent(model_name, test_state)
