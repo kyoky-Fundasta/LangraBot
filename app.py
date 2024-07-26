@@ -15,6 +15,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
+
 # from module.vector.pinecone import retrieve_document
 from module.web.tavily import search_on_web
 
@@ -38,53 +39,6 @@ from langgraph.errors import GraphRecursionError
 from langchain_core.runnables import RunnableConfig
 from module.llm.my_agent import ai_agent
 from module.llm.relevancy_test import groundedness_check
-
-# Rewrite the user question
-def rewrite(state: GraphState) -> GraphState:
-    question = state["question"]
-    answer = state["answer"]
-    context = state["context"]
-    web = state["web"]
-    chat_history = state["chat_history"]
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                "You are a professional prompt rewriter. Your task is to generate the question in order to get additional information that is now shown in the context."
-                "Your generated question will be searched on the web to find relevant information.",
-            ),
-            (
-                "human",
-                "Rewrite the question to get additional information to get the answer."
-                "\n\nHere is the chat history:\n ------- \n{chat_history}\n ------- \n"
-                "\n\nHere is the initial question:\n ------- \n{question}\n ------- \n"
-                "\n\nHere is the initial context:\n ------- \n{context}\n ------- \n"
-                "\n\nHere is the initial answer to the question:\n ------- \n{answer}\n ------- \n"
-                "\n\nFormulate an improved question in Japanese:",
-            ),
-        ]
-    )
-
-    # Question rewriting model
-    model = ChatOpenAI(temperature=0, model=gpt_model_name, openai_api_key=env_openai)
-    chain = prompt | model | StrOutputParser()
-    response = chain.invoke(
-        {
-            "chat_history": chat_history,
-            "question": question,
-            "answer": answer,
-            "context": context,
-        }
-    )
-    response = response + state["question"]
-    return GraphState(
-        question=response,
-        context=state["context"],
-        chat_history=chat_history,
-        web=state["web"],
-        answer=state["answer"],
-        relevance=state["relevance"],
-    )
 
 
 # Question-Answer check
@@ -182,10 +136,7 @@ def chat(user_question, chat_history, model_name, who):
 
     elif who == "FundastA_社員":
         chat_state_agent = ai_agent(model_name, chat_state)
-
-
-    eval_question = relevance_check_first(user_question, who)
-
+        groundedness_check_agent = groundedness_check(model_name, chat_state_agent)
 
         workflow.add_node("retrieve", retrieve_document)
         workflow.add_node("llm_answer", advanced_question)

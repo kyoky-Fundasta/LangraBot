@@ -11,13 +11,13 @@ from data.const import (
     env_openai,
     gpt_model_name,
     gpt_mini_model_name,
-    agent_prompt_mod,
 )
 from module.vector.pineconeDB import FundastA_Policy
 from module.web.tavily import web_search
 from data.const import env_genai
 from langchain_openai import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
+from data.prompt_templates.agent import prompt_template
 
 
 class DynamicPromptCallback(BaseCallbackHandler):
@@ -86,7 +86,7 @@ def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
         llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", openai_api_key=env_openai)
 
     prompt = hub.pull("hwchase17/react")
-    prompt.template = agent_prompt_mod
+    prompt.template = prompt_template
 
     dynamic_callback = DynamicPromptCallback(None)
     tools = [
