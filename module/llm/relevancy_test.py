@@ -31,7 +31,9 @@ def groundedness_check(selected_model, input_state: GraphState):
 
 You are a judge of an AI assistant.
 You should evaluate the groundedness of the AI's answer to a given question.
+Use the historical context to better understand the current question and provide a more accurate evaluation.
 
+Chat history: record of previous interactions between the user and the AI assistant.
 question: the question the AI should answer.
 answer: the answer the AI generated.
 context: the source information from documents used by the AI to generate the correct answer.
@@ -89,6 +91,7 @@ reasoning: The answer addresses the question and is grounded in the source infor
 source : "日本の山 PDFファイル:page 10, web:https://test.aa.bb/"
 
 # Now you should judge the real question:
+Chat history: {history}
 question: {question}
 answer: {answer}
 context: {context}
@@ -107,6 +110,7 @@ your answer:
             "answer": input_state["answer"],
             "context": input_state["context"],
             "web": input_state["web"],
+            "history": input_state["chat_history"],
             "format_instructions": parser.get_format_instructions(),
         },
     )
