@@ -24,7 +24,7 @@ class check_output(BaseModel):
     Source: str = Field(description="Provide source & page or source URL")
 
 
-def groundedness_check(selected_model, input_state: GraphState) -> GraphState:
+def groundedness_check(selected_model, input_state: GraphState):
     parser = JsonOutputParser(pydantic_object=check_output)
 
     prompt_template = """

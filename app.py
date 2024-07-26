@@ -37,6 +37,7 @@ import pprint
 from langgraph.errors import GraphRecursionError
 from langchain_core.runnables import RunnableConfig
 from module.llm.my_agent import ai_agent
+from module.llm.relevancy_test import groundedness_check
 
 # Rewrite the user question
 def rewrite(state: GraphState) -> GraphState:

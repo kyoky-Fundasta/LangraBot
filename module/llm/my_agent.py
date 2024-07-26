@@ -73,17 +73,17 @@ def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
 
     if selected_model == "Gemini_1.5_Flash":
         llm = ChatGoogleGenerativeAI(
-            model=gemini_model_name,
+            model="gemini-1.5-flash",
             google_api_key=env_genai,
             temperature=0,
             convert_system_message_to_human=True,
         )
     elif selected_model == "ChatGPT_3.5":
-        llm = ChatOpenAI(temperature=0, model=gpt_model_name, openai_api_key=env_openai)
-    elif selected_model == "ChatGPT_4o_mini":
         llm = ChatOpenAI(
-            temperature=0, model=gpt_mini_model_name, openai_api_key=env_openai
+            temperature=0, model="gpt-3.5-turbo-0125", openai_api_key=env_openai
         )
+    elif selected_model == "ChatGPT_4o_mini":
+        llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", openai_api_key=env_openai)
 
     prompt = hub.pull("hwchase17/react")
     prompt.template = agent_prompt_mod
@@ -105,7 +105,9 @@ def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
         return_intermediate_steps=False,
         callbacks=[dynamic_callback],
     )
-    agent_final_answer = agent_executor.invoke({"question": user_input})
+    agent_final_answer = agent_executor.invoke(
+        {"question": chat_state["question"], "history": chat_state["chat_history"]}
+    )
 
     chat_state["answer"] = agent_final_answer["output"]
     for output in dynamic_callback.tool_outputs:

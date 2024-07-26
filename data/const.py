@@ -17,12 +17,16 @@ env_pinecone = st.secrets["Pinecone_API_KEY"]
 pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
 
 agent_prompt_mod = """
-Answer the following questions as best you can. 
+You are an intelligent AI agent.
+Answer the following questions by referring to the provided chat history.
+Use the historical context to better understand the current question and provide a more accurate and relevant answer.
+
 You have access to the following tools: {tools}
 
 Use the following format:
- 
-Question: the input question you must answer
+
+Question: input question you must answer.
+Chat history: record of previous interactions between the user and the AI agent.
 Thought_1: you should always think about what to do. If you have already used the FundastA_Policy tool, it is recommended to use the 'web_search' tool next.\n
 Action: the action to take, should be one of [{tool_names}]. Note: You can only use the FundastA_Policy tool once; after that, use another appropriate tool.\n
 Action Input: the input to the action
@@ -44,6 +48,7 @@ The final answer must always be in Japanese.
 
 Begin!
 
+Chat history: {history}
 Question: {question}
 Thought: {agent_scratchpad}
 """
