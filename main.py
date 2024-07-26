@@ -8,7 +8,7 @@ st.title("💬 FundastA サポートデスク")
 st.caption("🤖 私は株式会社FundastAのAIアシストです。")
 
 
-menu_options = ["ChatGPT_3.5", "Gemini_1.5_Flash", "Claude"]
+menu_options = ["ChatGPT_4o_mini", "ChatGPT_3.5", "Gemini_1.5_Flash", "Claude"]
 login_options = ["FundastA_社員", "Guest"]
 model = st.selectbox("LLM models", menu_options)
 who = st.selectbox("Log-in options", login_options)

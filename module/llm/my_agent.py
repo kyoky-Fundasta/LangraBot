@@ -10,6 +10,7 @@ from data.const import (
     GraphState,
     env_openai,
     gpt_model_name,
+    gpt_mini_model_name,
     agent_prompt_mod,
 )
 from module.vector.pineconeDB import FundastA_Policy
@@ -70,15 +71,19 @@ class DynamicPromptCallback(BaseCallbackHandler):
 
 def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
 
-    if selected_model == "gemini":
+    if selected_model == "Gemini_1.5_Flash":
         llm = ChatGoogleGenerativeAI(
             model=gemini_model_name,
             google_api_key=env_genai,
             temperature=0,
             convert_system_message_to_human=True,
         )
-    elif selected_model == "gpt":
+    elif selected_model == "ChatGPT_3.5":
         llm = ChatOpenAI(temperature=0, model=gpt_model_name, openai_api_key=env_openai)
+    elif selected_model == "ChatGPT_4o_mini":
+        llm = ChatOpenAI(
+            temperature=0, model=gpt_mini_model_name, openai_api_key=env_openai
+        )
 
     prompt = hub.pull("hwchase17/react")
     prompt.template = agent_prompt_mod
@@ -115,7 +120,7 @@ def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
 
 if __name__ == "__main__":
     # user_input = "FundastAの有給休暇について説明してください"
-    user_input = "FundastAの社員数は何人ですか"
+    user_input = "FundastAの住所はどこですか"
     # user_input = "こんにちは、世界で一番高いビルは何ですか"
     # user_input = input("Question :")
     test_state = GraphState(
@@ -127,5 +132,7 @@ if __name__ == "__main__":
         chat_history=[],
     )
 
-    model_name = "gemini"
+    # model_name = "Gemini_1.5_Flash"
+    # model_name = "ChatGPT_3.5"
+    model_name = "ChatGPT_4o_mini"
     ai_agent(model_name, test_state)
