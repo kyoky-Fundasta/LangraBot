@@ -38,7 +38,8 @@ import pprint
 from langgraph.errors import GraphRecursionError
 from langchain_core.runnables import RunnableConfig
 from module.llm.my_agent import ai_agent
-from module.llm.relevancy_test import groundedness_check
+from module.llm.relevancy_test import groundedness_check, is_grounded
+from module.llm.editor import rewrite_question
 
 
 # Question-Answer check
@@ -112,8 +113,8 @@ def relevance_check_first(state: GraphState) -> GraphState:
     )
 
 
-def is_relevant(state: GraphState) -> GraphState:
-    return state["relevance"]
+def ask_with_hint():
+    pass
 
 
 # if __name__ == "__main__":
@@ -138,48 +139,32 @@ def chat(user_question, chat_history, model_name, who):
         chat_state_agent = ai_agent(model_name, chat_state)
         groundedness_check_agent = groundedness_check(model_name, chat_state_agent)
 
-        workflow.add_node("retrieve", retrieve_document)
-        workflow.add_node("llm_answer", advanced_question)
-        workflow.add_node("llm_answer_continue", advanced_question)
-        workflow.add_node("rewrite", rewrite)
-        workflow.add_node("search_on_web", search_on_web)
-        workflow.add_node("relevance_check", relevance_check)
-        workflow.add_node("relevance_check_continue", relevance_check)
+        workflow.add_node("rewrite_question", rewrite_question)
+        workflow.add_node("advanced_question", advanced_question)
+        workflow.add_node("groundedness_check", groundedness_check)
+
         # Connect nodes to each other
-        workflow.add_edge("retrieve", "llm_answer")
-        workflow.add_edge("llm_answer", "relevance_check")
-        workflow.add_edge("relevance_check", "search_on_web")
-        workflow.add_edge("search_on_web", "llm_answer_continue")
-        workflow.add_edge("llm_answer_continue", "relevance_check_continue")
-        workflow.add_edge("rewrite", "search_on_web")
+        workflow.add_edge("rewrite_question", "advanced_question")
+        workflow.add_edge("advanced_question", "groundedness_check")
 
         # If statement
         workflow.add_conditional_edges(
-            "relevance_check",
-            is_relevant,
+            "groundedness_check",
+            is_grounded,
             {
-                "Yes": END,  # Finish
-                "No": "search_on_web",  # Rewrite
-                "Not_sure": "search_on_web",  # Rewrite
-            },
-        )
-        workflow.add_conditional_edges(
-            "relevance_check_continue",
-            is_relevant,
-            {
-                "Yes": END,  # Finish
-                "No": "rewrite",  # Rewrite
-                "Not_sure": "rewrite",  # Rewrite
+                "grounded": END,  # Finish
+                "not grounded": "rewrite_question",  # Rewrite question
+                "not sure": "rewrite_question",  # Rewrite question
             },
         )
 
-        workflow.set_entry_point("retrieve")
+        workflow.set_entry_point("rewrite_question")
         memory = MemorySaver()
-        app = workflow.compile(checkpointer=memory)
+        langgraph_flow = workflow.compile(checkpointer=memory)
 
         #   Draw a diagram describing reasoning flow
         try:
-            graph = app.get_graph(xray=True)
+            graph = langgraph_flow.get_graph(xray=True)
             # Using draw_mermaid_png to render the graph
             png_bytes = graph.draw_mermaid_png()
             if png_bytes:
@@ -191,42 +176,26 @@ def chat(user_question, chat_history, model_name, who):
             print(f"An error occurred: {e}")
 
         config = RunnableConfig(
-            recursion_limit=12, configurable={"thread_id": "CORRECTIVE-SEARCH-RAG"}
+            recursion_limit=6, configurable={"thread_id": "CORRECTIVE-SEARCH-RAG"}
         )
 
-        inputs = GraphState(
-            question=user_question,
-            chat_history=chat_history,
-            context="",
-            web="",
-            answer="",
-            relevance="",
-        )
         final_answer = None
         relevancy = None
         try:
-            for output in app.stream(inputs, config=config):
+            for output in langgraph_flow.stream(chat_state, config=config):
                 for key, value in output.items():
                     pprint.pprint(f"\nOutput from node '{key}':")
                     pprint.pprint("---")
                     pprint.pprint(value, indent=2, width=80, depth=None)
-                    if key == "llm_answer" and "answer" in value:
-                        final_answer = value["answer"]
+                    if key == "advanced_question" and "answer" in value:
+                        final_answer = chat_state["answer"]
 
-                    if key == "llm_answer_continue" and "answer" in value:
-                        final_answer = value["answer"]
-
-                    elif key == "relevance_check_continue" and "relevance" in value:
-                        relevancy = value["relevance"]
-
-                    elif key == "relevance_check" and "relevance" in value:
-                        relevancy = value["relevance"]
+                    elif key == "groundedness_check" and "relevance" in value:
+                        relevancy = chat_state["relevance"]
 
         except GraphRecursionError as e:
             print(f"Recursion limit reached: {e}")
 
-        flag_2 = ""
-        flag_3 = ""
         if GraphState["context"] != "":
             flag_2 = "Context available"
         if GraphState["web"] != "":
@@ -237,11 +206,8 @@ def chat(user_question, chat_history, model_name, who):
             final_answer,
             "relevancy:",
             relevancy,
-            flag_1,
-            flag_2,
-            flag_3,
         )
-        return final_answer + "💛"
+        return final_answer + "🤖"
 
 
 # Example usage

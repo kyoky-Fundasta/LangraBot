@@ -25,6 +25,7 @@ class check_output(BaseModel):
     Source: str = Field(description="Provide source & page or source URL")
 
 
+# return groundedness result in json format : result, reasoning, source
 def groundedness_check(selected_model, input_state: GraphState):
     parser = JsonOutputParser(pydantic_object=check_output)
 
@@ -63,6 +64,10 @@ def groundedness_check(selected_model, input_state: GraphState):
 
     print(type(result_json), "\n", result_json)
     return result_json
+
+
+def is_grounded(result_json):
+    return result_json["result"]
 
 
 if __name__ == "__main__":
