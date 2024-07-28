@@ -25,3 +25,4 @@ class GraphState(TypedDict):
     web: str
     relevance: str
     chat_history: list
+    hint: str

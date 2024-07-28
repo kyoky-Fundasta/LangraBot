@@ -117,9 +117,55 @@ def ask_with_hint():
     pass
 
 
+def summarize_final_answer(chat_state, groundedness_check_final):
+    final_response = {
+        "question": "",
+        "answer": "",
+        "groundedness": "",
+        "reasoning": "",
+        "source": "",
+    }
+    if groundedness_check_final["result"] == "grounded":
+        final_response["question"] = chat_state["question"]
+        final_response["answer"] = chat_state["answer"]
+        final_response["groundedness"] = groundedness_check_final["result"]
+        final_response["reasoning"] = groundedness_check_final["reasoning"]
+        final_response["source"] = groundedness_check_final["source"]
+    else:
+        final_response["question"] = chat_state["question"]
+        final_response["answer"] = (
+            "申し訳ありません。詳しい情報が見つかりませんでした。担当部署にお問い合わせください。"
+        )
+        final_response["groundedness"] = groundedness_check_final["result"]
+        final_response["reasoning"] = groundedness_check_final["reasoning"]
+        final_response["source"] = ""
+    return final_response
+
+
+def invoke_chain(app, chat_state, confic):
+    result_1 = app.invoke(
+        chat_state,
+        confic={"selected_model": confic["selected_model"]},
+        node="rewrite_question",
+    )
+    result_2 = app.invoke(
+        chat_state,
+        confic={
+            "selected_model": confic["selected_model"],
+            "rewrited_question": result_1,
+        },
+        node="advanced_question",
+    )
+    result_3 = app.invoke(
+        chat_state,
+        confic={"selected_model": confic["selected_model"]},
+        node="groundedness_check",
+    )
+    return result_3
+
+
 # if __name__ == "__main__":
 def chat(user_question, chat_history, model_name, who):
-    workflow = StateGraph(GraphState)
 
     # Generate answer with LLM
     chat_state = GraphState(
@@ -129,6 +175,7 @@ def chat(user_question, chat_history, model_name, who):
         answer="",
         relevance="",
         chat_history=chat_history,
+        hint="",
     )
 
     if who == "Guest":
@@ -137,84 +184,81 @@ def chat(user_question, chat_history, model_name, who):
 
     elif who == "FundastA_社員":
         chat_state_agent = ai_agent(model_name, chat_state)
-        groundedness_check_agent = groundedness_check(model_name, chat_state_agent)
+        groundedness_check_agent = groundedness_check(chat_state_agent, model_name)
 
-        workflow.add_node("rewrite_question", rewrite_question)
-        workflow.add_node("advanced_question", advanced_question)
-        workflow.add_node("groundedness_check", groundedness_check)
+        if groundedness_check_agent["result"] == "grounded":
+            _ = summarize_final_answer(chat_state, groundedness_check_agent)
+            print("\n\n----------------Answering routine 1---------------------\n\n", _)
+            return _
 
-        # Connect nodes to each other
-        workflow.add_edge("rewrite_question", "advanced_question")
-        workflow.add_edge("advanced_question", "groundedness_check")
+        else:
+            workflow = StateGraph(GraphState)
 
-        # If statement
-        workflow.add_conditional_edges(
-            "groundedness_check",
-            is_grounded,
-            {
-                "grounded": END,  # Finish
-                "not grounded": "rewrite_question",  # Rewrite question
-                "not sure": "rewrite_question",  # Rewrite question
-            },
-        )
+            workflow.add_node("rewrite_question", rewrite_question)
+            workflow.add_node("advanced_question", advanced_question)
+            workflow.add_node("groundedness_check", groundedness_check)
 
-        workflow.set_entry_point("rewrite_question")
-        memory = MemorySaver()
-        langgraph_flow = workflow.compile(checkpointer=memory)
+            # Connect nodes to each other
+            workflow.add_edge("rewrite_question", "advanced_question")
+            workflow.add_edge("advanced_question", "groundedness_check")
 
-        #   Draw a diagram describing reasoning flow
-        try:
-            graph = langgraph_flow.get_graph(xray=True)
-            # Using draw_mermaid_png to render the graph
-            png_bytes = graph.draw_mermaid_png()
-            if png_bytes:
-                # Display the graph
-                display(Image(png_bytes))
-            else:
-                print("No PNG bytes generated")
-        except Exception as e:
-            print(f"An error occurred: {e}")
+            # If statement
+            workflow.add_conditional_edges(
+                "groundedness_check",
+                is_grounded,
+                {
+                    "grounded": END,  # Finish
+                    "not grounded": "rewrite_question",  # Rewrite question
+                    "not sure": "rewrite_question",  # Rewrite question
+                },
+            )
 
-        config = RunnableConfig(
-            recursion_limit=6, configurable={"thread_id": "CORRECTIVE-SEARCH-RAG"}
-        )
+            workflow.set_entry_point("rewrite_question")
+            memory = MemorySaver()
+            app = workflow.compile(checkpointer=memory)
 
-        final_answer = None
-        relevancy = None
-        try:
-            for output in langgraph_flow.stream(chat_state, config=config):
-                for key, value in output.items():
-                    pprint.pprint(f"\nOutput from node '{key}':")
-                    pprint.pprint("---")
-                    pprint.pprint(value, indent=2, width=80, depth=None)
-                    if key == "advanced_question" and "answer" in value:
-                        final_answer = chat_state["answer"]
+            #   Draw a diagram describing reasoning flow
+            try:
+                graph = invoke_chain.get_graph(xray=True)
+                # Using draw_mermaid_png to render the graph
+                png_bytes = graph.draw_mermaid_png()
+                if png_bytes:
+                    # Display the graph
+                    display(Image(png_bytes))
+                else:
+                    print("No PNG bytes generated")
+            except Exception as e:
+                print(f"An error occurred: {e}")
 
-                    elif key == "groundedness_check" and "relevance" in value:
-                        relevancy = chat_state["relevance"]
+            config = RunnableConfig(
+                recursion_limit=6, configurable={"thread_id": "CORRECTIVE-SEARCH-RAG"}
+            )
 
-        except GraphRecursionError as e:
-            print(f"Recursion limit reached: {e}")
+            last_output = None
 
-        if GraphState["context"] != "":
-            flag_2 = "Context available"
-        if GraphState["web"] != "":
-            flag_3 = "Web search available"
+            try:
+                for output in invoke_chain.stream(
+                    app, chat_state, {"selected_model": model_name}
+                ):
+                    last_output = output
+                    for key, value in output.items():
+                        pprint.pprint(f"\nOutput from node '{key}':")
+                        pprint.pprint("---")
+                        pprint.pprint(value, indent=2, width=80, depth=None)
+            except GraphRecursionError as e:
+                print(f"Recursion limit reached: {e}")
 
-        print(
-            "\n\n***Final Answer*** :",
-            final_answer,
-            "relevancy:",
-            relevancy,
-        )
-        return final_answer + "🤖"
+            _ = summarize_final_answer(chat_state, last_output)
+            print("\n\n----------------Answering routine 2---------------------\n\n", _)
+
+            return _
 
 
 # Example usage
 if __name__ == "__main__":
     chat_history = []  # Initialize chat history
-    question_1 = "FundastAの資本金はいくらですか"
-    answer_1 = chat(question_1, chat_history)
+    question_1 = "名古屋市の山本幸司さんがCEOをやっているIT会社の資本金はいくらですか"
+    answer_1 = chat(question_1, chat_history, "Gemini_1.5_Flash", "FundastA_社員")
 
 
 # %%

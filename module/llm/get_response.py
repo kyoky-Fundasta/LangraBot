@@ -1,43 +1,59 @@
+from langchain_google_genai import ChatGoogleGenerativeAI
 from data.const import GraphState
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import JsonOutputParser
+from data.prompt_templates.advanced_template import prompt_template
+from data.const import env_genai, env_openai
 
 # from langchain_core.output_parsers import CommaSeparatedListOutputParser
 from module.llm.BasicTripletChains import gpt_chain, gemini_chain
 
 
-def advanced_question(state: GraphState, model):
+def advanced_question(chat_state: GraphState, selected_model, rewrited_question):
+    output_parser = JsonOutputParser()
     # output_parser = CommaSeparatedListOutputParser()
     chat_history_str = "\n".join(
-        [f"ユーザー: {q}\nAI: {a}" for q, a in state["chat_history"]]
+        [f"ユーザー: {q}\nAI: {a}" for q, a in chat_state["chat_history"]]
     )
+    if selected_model == "Gemini_1.5_Flash":
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-1.5-flash",
+            google_api_key=env_genai,
+            temperature=0,
+            convert_system_message_to_human=True,
+        )
+    elif selected_model == "ChatGPT_3.5":
+        llm = ChatOpenAI(
+            temperature=0, model="gpt-3.5-turbo-0125", openai_api_key=env_openai
+        )
+    elif selected_model == "ChatGPT_4o_mini":
+        llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", openai_api_key=env_openai)
 
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                "あなたはフレンドリーなAIアシスタントです。ユーザーの質問に対して就業規則とウェブ検索結果をもとに簡単で明瞭な答えを生成してください。質問が複数ある時には最後の質問に答えてください。答えが見つからなかった場合には丁寧に誤って'情報が見つからなかったためお答えできません'と言ってください",
-            ),
-            (
-                "human",
-                f"以下のチャット履歴(chat_history)、就業規則(document)とウェブ検索結果(Web_Search)を参考にしてユーザーの質問(question)に答えてください。答えが見つからなかった場合には丁寧に誤って'情報が見つからなかったためお答えできません'と言ってください。\n\n#チャット履歴: {chat_history_str}\n\n#就業規則: {{document}}\n\n#ウェブ検索結果: {{web_search}}\n\n#質問: {{question}}\n\n#Your_answer:",
-            ),
-        ]
-    )
+    """
+    Intermediary question: {rewrited_question}
+    Hint1: {hint}
+    Chat history: {history}
+    Final question: {question}
+    Context: {context}
+    Web: {web}
+    """
+
+    prompt = prompt_template
     prompt = prompt.partial(
-        document=state["context"],
-        web_search=state["web"],
-        chat_history=state["chat_history"],
+        context=chat_state["context"],
+        web=chat_state["web"],
+        history=state["chat_history"],
+        question=chat_state["question"],
+        hint=chat_state["hint"],
     )
-    input = {"question": state["question"]}
-    if model == "gemini":
-        output = gemini_chain(prompt, state, input)
-        print("\n\n!!!Gemini advanced answer :", output)
-    elif model == "gpt":
-        output = gpt_chain(prompt, state, input)
-        print("\n\n!!!GPT advanced answer :", output)
-    state["answer"] = output
-    return state
+    input = {"rewrited_question": rewrited_question}
+
+    chain = prompt | llm | output_parser
+
+    advance_output_json = chain.invoke(input)
+    print(advance_output_json)
+    return advance_output_json
 
 
 def normal_question(state: GraphState, model):

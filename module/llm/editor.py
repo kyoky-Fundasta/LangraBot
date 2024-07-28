@@ -8,7 +8,7 @@ from data.const import env_genai, env_openai
 
 
 # Rewrite the user question
-def rewrite_question(selected_model, chat_state: GraphState):
+def rewrite_question(chat_state: GraphState, selected_model):
     chat_history_str = "\n".join(chat_state["chat_history"])
     question = chat_state["question"]
     context = chat_state["context"]

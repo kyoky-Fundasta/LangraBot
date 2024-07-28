@@ -16,17 +16,17 @@ from data.prompt_templates.relevancy_checker import prompt_template
 
 
 class check_output(BaseModel):
-    Result: str = Field(
+    result: str = Field(
         description="It should be on of  ['grounded', 'not grounded', 'not sure']"
     )
-    Reasoning: str = Field(
+    reasoning: str = Field(
         description="Explain the reason for the result shortly in Japanese"
     )
-    Source: str = Field(description="Provide source & page or source URL")
+    source: str = Field(description="Provide source & page or source URL")
 
 
 # return groundedness result in json format : result, reasoning, source
-def groundedness_check(selected_model, input_state: GraphState):
+def groundedness_check(input_state: GraphState, selected_model):
     parser = JsonOutputParser(pydantic_object=check_output)
 
     prompt = PromptTemplate(
