@@ -219,7 +219,7 @@ def chat(user_question, chat_history, model_name, who):
 
             #   Draw a diagram describing reasoning flow
             try:
-                graph = invoke_chain.get_graph(xray=True)
+                graph = app.get_graph(xray=True)
                 # Using draw_mermaid_png to render the graph
                 png_bytes = graph.draw_mermaid_png()
                 if png_bytes:
@@ -257,7 +257,7 @@ def chat(user_question, chat_history, model_name, who):
 # Example usage
 if __name__ == "__main__":
     chat_history = []  # Initialize chat history
-    question_1 = "名古屋市の山本幸司さんがCEOをやっているIT会社の資本金はいくらですか"
+    question_1 = "名古屋市の山本幸司さんがCEOをやっているSES会社に育児休暇はありますか"
     answer_1 = chat(question_1, chat_history, "Gemini_1.5_Flash", "FundastA_社員")
 
 

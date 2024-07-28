@@ -61,6 +61,17 @@ result: grounded
 reasoning: The answer addresses the question and is grounded in the source information.
 source : "日本の山 PDFファイル:page 10, web:https://test.aa.bb/"
 
+
+# Example 5:
+question: "Who was the first climber to summit the tallest mountain in Japan??"
+answer: "Based on the search results, the tallest mountain in Japan is Mount Fuji. However, information about the first person to summit it was not found."
+context: "<content>Mount Fuji is the tallest mountain in Japan.</content><source>日本の山 PDFファイル</source><page>10</page>"
+web: "<content>Mount Fuji is the tallest mountain in Japan.</content><source>https://test.aa.bb/</source>"
+
+result: not sure
+reasoning: I found some information regarding the question, but I was unable to answer all the questions.
+source : "日本の山 PDFファイル:page 10, web:https://test.aa.bb/"
+
 # Now you should judge the real question:
 chat history: {history}
 question: {question}

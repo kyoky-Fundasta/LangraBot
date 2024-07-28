@@ -17,7 +17,8 @@ from module.web.tavily import web_search
 from data.const import env_genai
 from langchain_openai import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
-from data.prompt_templates.agent import prompt_template
+from data.prompt_templates.advanced_agent_template import prompt_template
+from langchain_core.output_parsers import JsonOutputParser
 
 
 class DynamicPromptCallback(BaseCallbackHandler):
@@ -69,7 +70,7 @@ class DynamicPromptCallback(BaseCallbackHandler):
         self.tool_outputs.append({kwargs["name"]: output})
 
 
-def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
+def ai_agent(chat_state: GraphState, selected_model, rewrited_question) -> GraphState:
 
     if selected_model == "Gemini_1.5_Flash":
         llm = ChatGoogleGenerativeAI(
@@ -87,13 +88,23 @@ def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
 
     prompt = hub.pull("hwchase17/react")
     prompt.template = prompt_template
+    prompt = prompt.partial(
+        context=chat_state["context"],
+        question=chat_state["question"],
+        history=chat_state["chat_history"],
+        web=chat_state["web"],
+        hint=chat_state["hint"],
+    )
+    output_parser = JsonOutputParser()
+
+    chain = prompt | llm | output_parser
 
     dynamic_callback = DynamicPromptCallback(None)
     tools = [
         FundastA_Policy(callbacks=[dynamic_callback]),
         web_search(callbacks=[dynamic_callback]),
     ]
-    agent = create_react_agent(llm, tools, prompt=prompt)
+    agent = create_react_agent(chain, tools, prompt=prompt)
     dynamic_callback.agent = agent
 
     agent_executor = AgentExecutor(
@@ -101,13 +112,11 @@ def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
         tools=tools,
         handle_parsing_errors=True,
         verbose=True,
-        max_iterations=3,
+        max_iterations=2,
         return_intermediate_steps=False,
         callbacks=[dynamic_callback],
     )
-    agent_final_answer = agent_executor.invoke(
-        {"question": chat_state["question"], "history": chat_state["chat_history"]}
-    )
+    agent_final_answer = agent_executor.invoke({"rewrited_question": rewrited_question})
 
     chat_state["answer"] = agent_final_answer["output"]
     for output in dynamic_callback.tool_outputs:
@@ -122,7 +131,7 @@ def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
 
 if __name__ == "__main__":
     # user_input = "FundastAの有給休暇について説明してください"
-    user_input = "FundastAの住所はどこですか"
+    user_input = "名古屋市にある山本耕史さんがCEOをやっている会社に育児休暇がありますか"
     # user_input = "こんにちは、世界で一番高いビルは何ですか"
     # user_input = input("Question :")
     test_state = GraphState(
@@ -132,9 +141,10 @@ if __name__ == "__main__":
         answer="",
         relevance="",
         chat_history=[],
+        hint="",
     )
 
-    # model_name = "Gemini_1.5_Flash"
+    model_name = "Gemini_1.5_Flash"
     # model_name = "ChatGPT_3.5"
-    model_name = "ChatGPT_4o_mini"
-    ai_agent(model_name, test_state)
+    # model_name = "ChatGPT_4o_mini"
+    ai_agent(test_state, model_name, "FundastAに育児休暇がありますか")
