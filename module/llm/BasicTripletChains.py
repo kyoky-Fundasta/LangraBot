@@ -19,19 +19,19 @@ def gemini_str_parser(model_output):
 def gemini_chain(prompt, state: GraphState, input) -> str:
 
     model = ChatGoogleGenerativeAI(
-        model=gemini_model_name,
+        model="gemini-1.5-flash",
         google_api_key=env_genai,
         temperature=0,
         convert_system_message_to_human=True,
     )
     chain = prompt | model | gemini_str_parser
     response = chain.invoke(input)
-
+    print(response)
     return response
 
 
 def gpt_chain(prompt, state: GraphState, input) -> str:
-    model = ChatOpenAI(temperature=0, model=gpt_model_name, openai_api_key=env_openai)
+    model = ChatOpenAI(temperature=0, model="gpt-4o-mini", openai_api_key=env_openai)
     chain = prompt | model | StrOutputParser()
     response = chain.invoke(input)
 

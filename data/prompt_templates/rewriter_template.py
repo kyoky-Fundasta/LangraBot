@@ -14,9 +14,10 @@ prompt_template = ChatPromptTemplate.from_messages(
             "Rewrite the question to get additional information to get the answer."
             "\n\nHere is the chat history:\n ------- \n{chat_history}\n ------- \n"
             "\n\nHere is the initial question:\n ------- \n{question}\n ------- \n"
+            "\n\nHere is the initial answer to the question:\n ------- \n{answer}\n ------- \n"
+            "\n\nHere is an explanation of why the provided answer is considered incorrect.:\n ------- \n{reasoning}\n ------- \n"
             "\n\nHere is the initial context:\n ------- \n{context}\n ------- \n"
             "\n\nHere is the web search result1:\n ------- \n{web}\n ------- \n"
-            "\n\nHere is the initial answer to the question:\n ------- \n{answer}\n ------- \n"
             "\n\nFormulate an improved question in Japanese:",
         ),
     ]

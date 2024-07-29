@@ -19,10 +19,15 @@ pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
 
 # GraphState is a TypedDict that defines the structure of the graph state
 class GraphState(TypedDict):
+    selected_model: str
     question: str
     answer: str
     context: str
     web: str
     relevance: str
-    chat_history: list
+    chat_history: []
     hint: str
+    rewrotten_question: str
+    rewrotten_question_answer: str
+    reasoning: str
+    source: str

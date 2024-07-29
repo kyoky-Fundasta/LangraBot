@@ -1,7 +1,7 @@
 # Fixed the agent's inappropriate behavir by AgentExecutor's callback parameter.
 # Check the line no.92 and DynamicPromptCallback class
 
-from langchain import hub
+
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
 from data.const import (
@@ -17,7 +17,8 @@ from module.web.tavily import web_search
 from data.const import env_genai
 from langchain_openai import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
-from data.prompt_templates.agent import prompt_template
+from data.prompt_templates.agent_template import prompt_template
+from data.prompt_templates.default_template import prompt_template as default_template
 
 
 class DynamicPromptCallback(BaseCallbackHandler):
@@ -57,7 +58,7 @@ class DynamicPromptCallback(BaseCallbackHandler):
 
         if action.tool == "FundastA_Policy" and not self.fundasta_used:
             self.fundasta_used = True
-            self.update_prompt()
+            # self.update_prompt()
         elif action.tool == "FundastA_Policy" and self.fundasta_used:
             self.update_action(action)
 
@@ -69,8 +70,11 @@ class DynamicPromptCallback(BaseCallbackHandler):
         self.tool_outputs.append({kwargs["name"]: output})
 
 
-def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
-
+def ai_agent(chat_state: GraphState) -> GraphState:
+    selected_model = chat_state["selected_model"]
+    chat_history_str = "\n".join(
+        [f"ユーザー: {q}\nAI: {a}" for q, a in chat_state["chat_history"]]
+    )
     if selected_model == "Gemini_1.5_Flash":
         llm = ChatGoogleGenerativeAI(
             model="gemini-1.5-flash",
@@ -85,7 +89,7 @@ def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
     elif selected_model == "ChatGPT_4o_mini":
         llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", openai_api_key=env_openai)
 
-    prompt = hub.pull("hwchase17/react")
+    prompt = default_template
     prompt.template = prompt_template
 
     dynamic_callback = DynamicPromptCallback(None)
@@ -104,9 +108,10 @@ def ai_agent(selected_model, chat_state: GraphState) -> GraphState:
         max_iterations=3,
         return_intermediate_steps=False,
         callbacks=[dynamic_callback],
+        early_stopping_method="generate",
     )
     agent_final_answer = agent_executor.invoke(
-        {"question": chat_state["question"], "history": chat_state["chat_history"]}
+        {"question": chat_state["question"], "history": chat_history_str}
     )
 
     chat_state["answer"] = agent_final_answer["output"]
@@ -125,16 +130,22 @@ if __name__ == "__main__":
     user_input = "FundastAの住所はどこですか"
     # user_input = "こんにちは、世界で一番高いビルは何ですか"
     # user_input = input("Question :")
+
+    # model_name = "Gemini_1.5_Flash"
+    # model_name = "ChatGPT_3.5"
+    model_name = "ChatGPT_4o_mini"
+
     test_state = GraphState(
+        selected_model=model_name,
         question=user_input,
         context="",
         web="",
         answer="",
         relevance="",
         chat_history=[],
+        hint="",
+        rewrotten_question="",
+        rewrotten_question_answer="",
     )
 
-    # model_name = "Gemini_1.5_Flash"
-    # model_name = "ChatGPT_3.5"
-    model_name = "ChatGPT_4o_mini"
-    ai_agent(model_name, test_state)
+    ai_agent(test_state)

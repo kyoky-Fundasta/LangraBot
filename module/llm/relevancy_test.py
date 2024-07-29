@@ -12,7 +12,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from data.test_data.test_state import test_result_0, test_result_1
-from data.prompt_templates.relevancy_checker import prompt_template
+from data.prompt_templates.relevancy_checker_template import prompt_template
 
 
 class check_output(BaseModel):
@@ -26,7 +26,8 @@ class check_output(BaseModel):
 
 
 # return groundedness result in json format : result, reasoning, source
-def groundedness_check(input_state: GraphState, selected_model):
+def groundedness_check(input_state: GraphState) -> GraphState:
+    selected_model = input_state["selected_model"]
     parser = JsonOutputParser(pydantic_object=check_output)
 
     prompt = PromptTemplate(
@@ -61,9 +62,11 @@ def groundedness_check(input_state: GraphState, selected_model):
 
     chain = prompt | llm | parser
     result_json = chain.invoke({"question": input_state["question"]})
-
-    print(type(result_json), "\n", result_json)
-    return result_json
+    input_state["relevance"] = result_json["result"]
+    input_state["reasoning"] = result_json["reasoning"]
+    input_state["source"] = result_json["source"]
+    # print(type(result_json), "\n", result_json)
+    return input_state
 
 
 def is_grounded(result_json):

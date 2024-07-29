@@ -2,18 +2,20 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from data.const import GraphState
 from langchain_core.prompts import ChatPromptTemplate
-from data.prompt_templates.rewriter import prompt_template
+from data.prompt_templates.rewriter_template import prompt_template
 from langchain_core.output_parsers import StrOutputParser
 from data.const import env_genai, env_openai
 
 
-# Rewrite the user question
-def rewrite_question(chat_state: GraphState, selected_model):
+# Rewrite the user question. Returns a new GraphState.
+def rewrite_question(chat_state: GraphState) -> GraphState:
+    selected_model = chat_state["selected_model"]
     chat_history_str = "\n".join(chat_state["chat_history"])
     question = chat_state["question"]
     context = chat_state["context"]
     web = chat_state["web"]
     answer = chat_state["answer"]
+    reasoning = chat_state["reasoning"]
 
     prompt = prompt_template
 
@@ -41,9 +43,11 @@ def rewrite_question(chat_state: GraphState, selected_model):
             "chat_history": chat_history_str,
             "question": question,
             "answer": answer,
+            "reasoning": reasoning,
             "context": context,
             "web": web,
         }
     )
-    print("\n------updated question :", response)
-    return response
+    chat_state["rewrotten_question"] = response
+    print("\n------updated question :", chat_state)
+    return chat_state

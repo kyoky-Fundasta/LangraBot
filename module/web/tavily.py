@@ -4,6 +4,7 @@ from langchain_community.utilities.tavily_search import TavilySearchAPIWrapper
 from langchain_community.tools.tavily_search import TavilySearchResults
 from module.tools.utils import format_searched_docs
 from langchain.tools.base import BaseTool
+from data.test_data.tavily_search_sample import tavily_result2
 
 os.environ["TAVILY_API_KEY"] = env_tavily
 
@@ -23,7 +24,7 @@ class web_search(BaseTool):
     def _run(self, input_str: str):
 
         search = TavilySearchAPIWrapper()
-        search_tool = TavilySearchResults(max_results=8, api_wrapper=search)
+        search_tool = TavilySearchResults(max_results=5, api_wrapper=search)
         search_result = search_tool.invoke({"query": input_str})
 
         search_result = format_searched_docs(search_result)
@@ -36,27 +37,28 @@ class web_search(BaseTool):
 
 # Web search API
 def search_on_web(state: GraphState) -> GraphState:
-    # Tavily web search
-    search = TavilySearchAPIWrapper()
-    search_tool = TavilySearchResults(max_results=6, api_wrapper=search)
-    search_result = search_tool.invoke({"query": state["question"]})
+    # # Tavily web search
+    # search = TavilySearchAPIWrapper()
+    # search_tool = TavilySearchResults(max_results=6, api_wrapper=search)
+    # search_result = search_tool.invoke({"query": state["question"]})
 
-    # # Test data for saving tavily search api fee
-    # search_result = tavily_result1
+    # # # Test data for saving tavily search api fee
+    # # search_result = tavily_result1
 
-    # print("##Tavily:", search_result)
-    # Reshape the search_result
-    search_result = format_searched_docs(search_result)
+    # # print("##Tavily:", search_result)
+    # # Reshape the search_result
+    # search_result = format_searched_docs(search_result)
 
-    # Preserve it in the state.
-    return GraphState(
-        question=state["question"],
-        context=state["context"],
-        web=search_result,
-        chat_history=state["chat_history"],
-        answer=state["answer"],
-        relevance=state["relevance"],
-    )
+    # # Preserve it in the state.
+    # return GraphState(
+    #     question=state["question"],
+    #     context=state["context"],
+    #     web=search_result,
+    #     chat_history=state["chat_history"],
+    #     answer=state["answer"],
+    #     relevance=state["relevance"],
+    # )
+    return tavily_result2
 
 
 if __name__ == "__main__":

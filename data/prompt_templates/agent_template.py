@@ -13,7 +13,7 @@ Thought_1: you should always think about what to do. If you have already used th
 Action: the action to take, should be one of [{tool_names}]. Note: You can only use the FundastA_Policy tool once; after that, use another appropriate tool.\n
 Action Input: the input to the action
 Observation: the result of the action
-... (this Thought_1/Action/Action Input/Observation can repeat N times)
+... (this Thought_1/Action/Action Input/Observation can repeat 3 times)
 Thought_2: After getting the result of the action, check whether you can find relevant information for the question.
 - Pattern 1: I now know the final answer (for cases where you know the final answer without using any tools).
 - Pattern 2: I found relevant information from the result of the action and now I know the final answer (for cases where you used a tool and found relevant information).

@@ -17,8 +17,8 @@ from module.web.tavily import web_search
 from data.const import env_genai
 from langchain_openai import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
-from data.prompt_templates.advanced_agent_template import prompt_template
-from langchain_core.output_parsers import JsonOutputParser
+from data.prompt_templates.agent_template import prompt_template
+from data.prompt_templates.default_template import prompt_template as default_template
 
 
 class DynamicPromptCallback(BaseCallbackHandler):
@@ -58,7 +58,7 @@ class DynamicPromptCallback(BaseCallbackHandler):
 
         if action.tool == "FundastA_Policy" and not self.fundasta_used:
             self.fundasta_used = True
-            self.update_prompt()
+            # self.update_prompt()
         elif action.tool == "FundastA_Policy" and self.fundasta_used:
             self.update_action(action)
 
@@ -70,8 +70,13 @@ class DynamicPromptCallback(BaseCallbackHandler):
         self.tool_outputs.append({kwargs["name"]: output})
 
 
-def ai_agent(chat_state: GraphState, selected_model, rewrited_question) -> GraphState:
-
+def ai_advanced_agent(chat_state: GraphState) -> GraphState:
+    selected_model = chat_state["selected_model"]
+    chat_history_str = (
+        "\n".join([f"ユーザー: {q}\nAI: {a}" for q, a in chat_state["chat_history"]])
+        + chat_state["question"]
+    )
+    chat_history_str=chat_history_str+f"\nユーザー:{chat_state["question"]}\nAI:{chat_state["answer"]},{chat_state["reasoning"]}"
     if selected_model == "Gemini_1.5_Flash":
         llm = ChatGoogleGenerativeAI(
             model="gemini-1.5-flash",
@@ -86,25 +91,15 @@ def ai_agent(chat_state: GraphState, selected_model, rewrited_question) -> Graph
     elif selected_model == "ChatGPT_4o_mini":
         llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", openai_api_key=env_openai)
 
-    prompt = hub.pull("hwchase17/react")
+    prompt = default_template
     prompt.template = prompt_template
-    prompt = prompt.partial(
-        context=chat_state["context"],
-        question=chat_state["question"],
-        history=chat_state["chat_history"],
-        web=chat_state["web"],
-        hint=chat_state["hint"],
-    )
-    output_parser = JsonOutputParser()
-
-    chain = prompt | llm | output_parser
 
     dynamic_callback = DynamicPromptCallback(None)
     tools = [
         FundastA_Policy(callbacks=[dynamic_callback]),
         web_search(callbacks=[dynamic_callback]),
     ]
-    agent = create_react_agent(chain, tools, prompt=prompt)
+    agent = create_react_agent(llm, tools, prompt=prompt)
     dynamic_callback.agent = agent
 
     agent_executor = AgentExecutor(
@@ -112,18 +107,31 @@ def ai_agent(chat_state: GraphState, selected_model, rewrited_question) -> Graph
         tools=tools,
         handle_parsing_errors=True,
         verbose=True,
-        max_iterations=2,
+        max_iterations=3,
         return_intermediate_steps=False,
         callbacks=[dynamic_callback],
+        early_stopping_method="generate",
     )
-    agent_final_answer = agent_executor.invoke({"rewrited_question": rewrited_question})
+    chat_state["rewrotten_question_answer"] = agent_executor.invoke(
+        {
+            "rewrotten_question": chat_state["rewrotten_question"],
+            "history": chat_history_str,
+        }
+    )
 
-    chat_state["answer"] = agent_final_answer["output"]
+    chat_state["hint"] = str(
+        chat_state["hint"]
+        + " - "
+        + chat_state["rewrotten_question"]
+        + " : "
+        + chat_state["rewrotten_question_answer"]
+        + "\n"
+    )
     for output in dynamic_callback.tool_outputs:
         if "FundastA_Policy" in output:
-            chat_state["context"] = output["FundastA_Policy"]
+            chat_state["context"] = chat_state["context"] + output["FundastA_Policy"]
         elif "web_search" in output:
-            chat_state["web"] = output["web_search"]
+            chat_state["web"] = chat_state["web"] + output["web_search"]
     print(chat_state)
 
     return chat_state
@@ -131,10 +139,17 @@ def ai_agent(chat_state: GraphState, selected_model, rewrited_question) -> Graph
 
 if __name__ == "__main__":
     # user_input = "FundastAの有給休暇について説明してください"
-    user_input = "名古屋市にある山本耕史さんがCEOをやっている会社に育児休暇がありますか"
+    user_input = "名古屋市にある山本幸次さんがCEOをやっている会社の住所はどこですか"
+    rewrotten_input = "質問しているの会社の名前はFundastAです。"
     # user_input = "こんにちは、世界で一番高いビルは何ですか"
     # user_input = input("Question :")
+
+    # model_name = "Gemini_1.5_Flash"
+    # model_name = "ChatGPT_3.5"
+    model_name = "ChatGPT_4o_mini"
+
     test_state = GraphState(
+        selected_model=model_name,
         question=user_input,
         context="",
         web="",
@@ -142,9 +157,8 @@ if __name__ == "__main__":
         relevance="",
         chat_history=[],
         hint="",
+        rewrotten_question=rewrotten_input,
+        rewrotten_question_answer="",
     )
 
-    model_name = "Gemini_1.5_Flash"
-    # model_name = "ChatGPT_3.5"
-    # model_name = "ChatGPT_4o_mini"
-    ai_agent(test_state, model_name, "FundastAに育児休暇がありますか")
+    ai_advanced_agent(test_state)
