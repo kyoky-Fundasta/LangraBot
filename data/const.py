@@ -25,7 +25,7 @@ class GraphState(TypedDict):
     context: str
     web: str
     relevance: str
-    chat_history: []
+    chat_history: list
     hint: str
     rewrotten_question: str
     rewrotten_question_answer: str

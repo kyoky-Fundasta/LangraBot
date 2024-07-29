@@ -17,7 +17,7 @@ from module.web.tavily import web_search
 from data.const import env_genai
 from langchain_openai import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
-from data.prompt_templates.agent_template import prompt_template
+from data.prompt_templates.advanced_agent_template import prompt_template
 from data.prompt_templates.default_template import prompt_template as default_template
 
 
@@ -76,7 +76,10 @@ def ai_advanced_agent(chat_state: GraphState) -> GraphState:
         "\n".join([f"ユーザー: {q}\nAI: {a}" for q, a in chat_state["chat_history"]])
         + chat_state["question"]
     )
-    chat_history_str=chat_history_str+f"\nユーザー:{chat_state["question"]}\nAI:{chat_state["answer"]},{chat_state["reasoning"]}"
+    chat_history_str = (
+        chat_history_str
+        + f'\nユーザー:{chat_state["question"]}\nAI:{chat_state["answer"]},{chat_state["reasoning"]}'
+    )
     if selected_model == "Gemini_1.5_Flash":
         llm = ChatGoogleGenerativeAI(
             model="gemini-1.5-flash",
@@ -119,7 +122,7 @@ def ai_advanced_agent(chat_state: GraphState) -> GraphState:
         }
     )
 
-    chat_state["hint"] = str(
+    chat_state["hint"] = (
         chat_state["hint"]
         + " - "
         + chat_state["rewrotten_question"]
@@ -159,6 +162,7 @@ if __name__ == "__main__":
         hint="",
         rewrotten_question=rewrotten_input,
         rewrotten_question_answer="",
+        reasoning="",
     )
 
     ai_advanced_agent(test_state)

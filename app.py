@@ -149,7 +149,7 @@ def chat(user_question, chat_history, model_name, who):
         chat_state_agent = ai_agent(chat_state)
         chat_state = groundedness_check(chat_state_agent)
 
-        if chat_state["result"] == "grounded":
+        if chat_state["relevance"] == "grounded":
             _ = summarize_final_answer(chat_state)
             print("\n\n----------------Answering routine 1---------------------\n\n", _)
             return _
