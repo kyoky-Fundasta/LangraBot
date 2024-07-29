@@ -72,9 +72,8 @@ class DynamicPromptCallback(BaseCallbackHandler):
 
 def ai_advanced_agent(chat_state: GraphState) -> GraphState:
     selected_model = chat_state["selected_model"]
-    chat_history_str = (
-        "\n".join([f"ユーザー: {q}\nAI: {a}" for q, a in chat_state["chat_history"]])
-        + chat_state["question"]
+    chat_history_str = "\n".join(
+        [f"ユーザー: {q}\nAI: {a}" for q, a in chat_state["chat_history"]]
     )
     chat_history_str = (
         chat_history_str
@@ -113,15 +112,16 @@ def ai_advanced_agent(chat_state: GraphState) -> GraphState:
         max_iterations=3,
         return_intermediate_steps=False,
         callbacks=[dynamic_callback],
-        early_stopping_method="generate",
+        early_stopping_method="force",
     )
-    chat_state["rewrotten_question_answer"] = agent_executor.invoke(
+    result = agent_executor.invoke(
         {
             "rewrotten_question": chat_state["rewrotten_question"],
             "history": chat_history_str,
         }
     )
-
+    chat_state["rewrotten_question_answer"] = result["output"]
+    print(chat_state["rewrotten_question_answer"])
     chat_state["hint"] = (
         chat_state["hint"]
         + " - "

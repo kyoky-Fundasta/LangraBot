@@ -108,7 +108,7 @@ def ai_agent(chat_state: GraphState) -> GraphState:
         max_iterations=3,
         return_intermediate_steps=False,
         callbacks=[dynamic_callback],
-        early_stopping_method="generate",
+        early_stopping_method="force",
     )
     agent_final_answer = agent_executor.invoke(
         {"question": chat_state["question"], "history": chat_history_str}
