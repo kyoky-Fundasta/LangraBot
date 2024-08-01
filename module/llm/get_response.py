@@ -58,10 +58,10 @@ def normal_question(state: GraphState):
     input = {"question": state["question"]}
     if model == "Gemini_1.5_Flash":
         output = gemini_chain(prompt, state, input)
-        print("\n\n!!!Gemini normal answer :", output)
+        print("\n\n!!!Gemini normal answer :", type(output), output)
     elif model == "ChatGPT_4o_mini" or "ChatGPT_3.5":
         output = gpt_chain(prompt, state, input)
-        print("\n\n!!!GPT normal answer :", output)
+        print("\n\n!!!GPT normal answer :", type(output), output)
     state["answer"] = output
     return state
 

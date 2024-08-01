@@ -1,6 +1,5 @@
 # %%
 
-
 from module.llm.advanced_agent import ai_advanced_agent
 
 
@@ -22,14 +21,14 @@ def summarize_final_answer(chat_state):
     final_response = {
         "question": "",
         "answer": "",
-        "groundedness": "",
+        "relevance": "",
         "reasoning": "",
         "source": "",
     }
     if chat_state["relevance"] == "grounded":
         final_response["question"] = chat_state["question"]
         final_response["answer"] = chat_state["answer"]
-        final_response["groundedness"] = chat_state["relevance"]
+        final_response["relevance"] = chat_state["relevance"]
         final_response["reasoning"] = chat_state["reasoning"]
         final_response["source"] = chat_state["source"]
     else:
@@ -37,26 +36,10 @@ def summarize_final_answer(chat_state):
         final_response["answer"] = (
             "申し訳ありません。詳しい情報が見つかりませんでした。担当部署にお問い合わせください。"
         )
-        final_response["groundedness"] = chat_state["relevance"]
+        final_response["relevance"] = chat_state["relevance"]
         final_response["reasoning"] = chat_state["reasoning"]
         final_response["source"] = chat_state["source"]
     return final_response
-
-
-# def merge_states(chat_state: GraphState, agent_state: GraphState) -> GraphState:
-#     hint = agent_state["question"] + agent_state["answer"]
-#     merged_context = chat_state["context"] + agent_state["context"]
-#     merged_web = chat_state["web"] + agent_state["web"]
-#     merged_state = GraphState(
-#         question=chat_state["question"],
-#         hint=hint,
-#         context=merged_context,
-#         web=merged_web,
-#         answer="",
-#         chat_history=chat_state["chat_history"],
-#         relevance=chat_state["relevance"],
-#     )
-#     return merged_state
 
 
 def invoke_chain(app, chat_state, selected_model):
@@ -97,9 +80,10 @@ def invoke_chain(app, chat_state, selected_model):
     return final
 
 
+# Main program, associated with streamlit GUI.
 def chat(user_question, chat_history, model_name, who):
 
-    # Generate answer with LLMphState
+    # Main GraphState
     chat_state = GraphState(
         selected_model=model_name,
         question=user_question,
@@ -115,34 +99,52 @@ def chat(user_question, chat_history, model_name, who):
         source="",
     )
 
+    print("------First state : ", chat_state)
+
+    # The guest only can use normal LLM fuction
     if who == "Guest":
         final_answer = normal_question(chat_state)
-        return final_answer + "\n👦 Guest mode"
+        return final_answer
 
+    # Members can use RAG & Onlin search features.
     elif who == "FundastA_社員":
         chat_state_agent = ai_agent(chat_state)
-        chat_state = groundedness_check(chat_state_agent)
+        if chat_state["context"] == "" and chat_state["web"] == "":
+            print(
+                f"\n\n----------------No Groundedness check---------------------\n\n",
+                chat_state,
+            )
+            return chat_state
+        else:
+            chat_state = groundedness_check(chat_state_agent)
 
         if chat_state["relevance"] == "grounded":
             _ = summarize_final_answer(chat_state)
-            print("\n\n----------------Answering routine 1---------------------\n\n", _)
+            print(
+                f'\n\n----------------Entering routine 1 : {chat_state["relevance"]}---------------------\n\n',
+                chat_state,
+            )
             return _
 
         else:
+            print(
+                f'\n\n----------------Entering routine 2 : {chat_state["relevance"]}---------------------\n\n',
+                chat_state,
+            )
             workflow = StateGraph(GraphState)
 
+            # create nodes
             workflow.add_node("rewrite_question", rewrite_question)
             workflow.add_node("ai_advanced_agent", ai_advanced_agent)
             workflow.add_node("advanced_question", advanced_question)
             workflow.add_node("groundedness_check", groundedness_check)
 
             # Connect nodes to each other
-            # workflow.add_edge("rewrite_question", "advanced_question")
-            # workflow.add_edge("advanced_question", "groundedness_check")
             workflow.add_edge("rewrite_question", "ai_advanced_agent")
             workflow.add_edge("ai_advanced_agent", "advanced_question")
             workflow.add_edge("advanced_question", "groundedness_check")
-            # If statement
+
+            # If statement like behavior
             workflow.add_conditional_edges(
                 "groundedness_check",
                 is_grounded,
@@ -159,7 +161,8 @@ def chat(user_question, chat_history, model_name, who):
             config = RunnableConfig(
                 recursion_limit=2, configurable={"thread_id": "CORRECTIVE-SEARCH-RAG"}
             )
-            #   Draw a diagram describing reasoning flow
+
+            ##   Draw a diagram describing reasoning flow (You need jupyter for this function)
             # try:
             #     graph = app.get_graph(xray=True)
             #     # Using draw_mermaid_png to render the graph

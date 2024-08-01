@@ -43,11 +43,11 @@ class DynamicPromptCallback(BaseCallbackHandler):
         self.action_count = 1
         self.llm_comment = ""
 
-    def trim_llm_text(llm_text: str) -> str:
+    def trim_llm_text(self, llm_text: str) -> str:
         pattern = r"Thought:(.*?)Action:"
         match = re.search(pattern, llm_text, re.DOTALL)
         if match:
-            return match.groupt(1).strip()
+            return match.group(1).strip()
         else:
             return ""
 
@@ -156,7 +156,7 @@ def ai_agent(chat_state: GraphState) -> GraphState:
     dynamic_callback = DynamicPromptCallback(None)
     llm.callbacks = [dynamic_callback]
     prompt = default_template
-    prompt.template = prompt_template
+    # prompt.template = prompt_template
 
     tools = [
         FundastA_Policy(callbacks=[dynamic_callback]),

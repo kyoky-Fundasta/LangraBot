@@ -25,6 +25,10 @@ class check_output(BaseModel):
 # return groundedness result in json format : result, reasoning, source
 def groundedness_check(input_state: GraphState) -> GraphState:
     selected_model = input_state["selected_model"]
+    if not (input_state["context"] and input_state["web"]):
+        input_state["relevance"] = ""
+        return input_state
+
     parser = JsonOutputParser(pydantic_object=check_output)
 
     prompt = PromptTemplate(
@@ -45,7 +49,12 @@ def groundedness_check(input_state: GraphState) -> GraphState:
     input_state["relevance"] = result_json["result"]
     input_state["reasoning"] = result_json["reasoning"]
     input_state["source"] = result_json["source"]
-    # print(type(result_json), "\n", result_json)
+    print(
+        "\n\n------------------Double check result :",
+        type(result_json),
+        "\n",
+        result_json,
+    )
     return input_state
 
 

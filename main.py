@@ -1,5 +1,5 @@
 import streamlit as st
-from app import chat, pinecone
+from app import chat
 
 
 # WebUI (Streamlit)
@@ -25,38 +25,42 @@ if ai_bot == "チャットで質問":
         st.session_state["chat_history"] = []
 
     with st.container():
-        prompt = st.chat_input("👤質問を入力してください")
+        input = st.chat_input("👤質問を入力してください")
 
-    if prompt:
+    if input:
 
         with st.spinner("🤖 考え中......"):
             ai_answer = chat(
-                user_question=prompt,
+                user_question=input,
                 chat_history=st.session_state["chat_history"],
                 model_name=model,
                 who=who,
             )
-            # # pages = [
-            # #     str(int(doc.metadata.get("page-number")))
-            # #     for doc in ai_answer["source_documents"]
-            # # ]
-            # str = ", ".join(pages)
-            # formatted_answer = ai_answer["answer"]
-            # formatted_answer = f'{ai_answer["answer"]}\n\n参照したページ：{str}'
-            # st.write(formatted_answer)
+
+            if who == "Guest":
+                formatted_answer = ai_answer["answer"] + "\n👦 Guest mode"
+            elif who == "FundastA_社員":
+                last_answer = ai_answer["answer"] + "\n🏢 社員 mode"
+                if ai_answer["relevance"] == "grounded":
+                    feedback = "判定：🌞　　feedback : " + ai_answer["reasoning"]
+                elif ai_answer["relevance"] == "":
+                    feedback = ""
+                else:
+                    feedback = "判定：☔　　feedback : " + ai_answer["reasoning"]
+                formatted_answer = last_answer + "\n" + feedback
         st.session_state["message"].append(
             {
                 "role": "assistant",
-                "content": ai_answer,
+                "content": formatted_answer,
             }
         )
         st.session_state["message"].append(
             {
                 "role": "user",
-                "content": prompt,
+                "content": input,
             }
         )
-        st.session_state["chat_history"].append((prompt, ai_answer))
+        st.session_state["chat_history"].append((input, formatted_answer))
 
         if st.session_state["message"]:
 

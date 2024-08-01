@@ -8,7 +8,9 @@ from data.const import llm_switch
 # Rewrite the user question. Returns a new GraphState.
 def rewrite_question(chat_state: GraphState) -> GraphState:
     selected_model = chat_state["selected_model"]
-    chat_history_str = "\n".join(chat_state["chat_history"])
+    chat_history_str = "\n".join(
+        [f"ユーザー: {q}\nAI: {a}" for q, a in chat_state["chat_history"]]
+    )
     question = chat_state["question"]
     context = chat_state["context"]
     web = chat_state["web"]
