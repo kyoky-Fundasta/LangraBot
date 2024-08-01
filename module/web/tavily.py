@@ -23,14 +23,16 @@ class web_search(BaseTool):
 
     def _run(self, input_str: str):
 
-        # search = TavilySearchAPIWrapper()
-        # search_tool = TavilySearchResults(max_results=5, api_wrapper=search)
-        # search_result = search_tool.invoke({"query": input_str})
+        search = TavilySearchAPIWrapper()
+        search_tool = TavilySearchResults(max_results=5, api_wrapper=search)
+        search_result = search_tool.invoke({"query": input_str})
 
-        # search_result = format_searched_docs(search_result)
-        # # print("\n\nClass :", type(search_result), search_result)
-        # return "\n\n" + search_result + "\n\n"
-        return tavily_result2
+        search_result = format_searched_docs(search_result, input_str)
+        # print("\n\nClass :", type(search_result), search_result)
+        return "\n\n" + search_result + "\n\n"
+
+        ## Return a dummy search result. To save api calls.
+        # return tavily_result2
 
     def _arun(self, input_str: str):
         raise NotImplementedError("Async method not implemented")

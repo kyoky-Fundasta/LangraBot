@@ -60,7 +60,7 @@ Action: Choose an action from [{tool_names}]. Note: You can only use each tool o
 Action Input: The input for the chosen action.
 Observation: The result of the action.
 
-... (This Thought/Action/Action Input/Observation can repeat up to 3 times)
+... (This Thought/Action/Action Input/Observation can repeat up to 2 times)
 
 Thought: After getting the action result, determine if you have enough relevant information to answer the question.
 Final Answer: Provide the final answer to the original input question in Japanese.

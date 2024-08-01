@@ -1,7 +1,7 @@
 # AI assistant agent. Answer a user question using tools.
 # StateGraph -> StateGraph
 
-
+import re
 from uuid import UUID
 
 from langchain.agents import (
@@ -16,7 +16,6 @@ from typing import Any, Dict, List, Union
 
 from module.vector.pineconeDB import FundastA_Policy
 from module.web.tavily import web_search
-from module.llm.get_response import answering_bot
 
 from data.prompt_templates.agent_template import prompt_template, agent_updated_template
 from data.prompt_templates.default_template import prompt_template as default_template
@@ -42,6 +41,15 @@ class DynamicPromptCallback(BaseCallbackHandler):
         self.tool_output_values = []
         self.tool_counter = 1
         self.action_count = 1
+        self.llm_comment = ""
+
+    def trim_llm_text(llm_text: str) -> str:
+        pattern = r"Thought:(.*?)Action:"
+        match = re.search(pattern, llm_text, re.DOTALL)
+        if match:
+            return match.groupt(1).strip()
+        else:
+            return ""
 
     # A custom function to update agent's prompt.
     # I made this because the default prompt did not work with my agent properly after the second iteration.
@@ -100,14 +108,13 @@ class DynamicPromptCallback(BaseCallbackHandler):
     # Agent's prompt should be updated before it starts its llm.
     def on_tool_end(self, output: str, **kwargs):
 
-        print(f"\n\n-----------#{self.tool_counter} : Tool ended----------------\n")
-
-        self.tool_counter += 1
         # print(f"\n\n{kwargs['name']} Tool ended. Output: {output}")
         self.tool_outputs.append({kwargs["name"]: output})
         self.used_tool_name.append(kwargs["name"])
         self.tool_output_values.append(output)
         self.update_prompt()
+        print(f"\n\n-----------#{self.tool_counter} : Tool ended----------------\n")
+        self.tool_counter += 1
 
     def on_chain_end(
         self,
@@ -128,11 +135,15 @@ class DynamicPromptCallback(BaseCallbackHandler):
         parent_run_id: Optional[UUID] = None,
         **kwargs: Any,
     ) -> None:
+
+        trimmed_comment = self.trim_llm_text(response.generations[0][0].text)
+        self.llm_comment = self.llm_comment + trimmed_comment
         print(
-            f"\n------------------LLM end : \n{response.generations[0][0].text}\n--------------------"
+            f"\n------------------LLM end : \n{self.llm_comment}\n--------------------"
         )
 
 
+# This is the first agent the main app calls. I expect most questions should be solved by this.
 def ai_agent(chat_state: GraphState) -> GraphState:
 
     selected_model = chat_state["selected_model"]
@@ -150,9 +161,12 @@ def ai_agent(chat_state: GraphState) -> GraphState:
     tools = [
         FundastA_Policy(callbacks=[dynamic_callback]),
         web_search(callbacks=[dynamic_callback]),
-        answering_bot(callbacks=[dynamic_callback]),
     ]
-    agent = create_react_agent(llm, tools, prompt=prompt)
+    agent = create_react_agent(
+        llm,
+        tools,
+        prompt=prompt,
+    )
     dynamic_callback.agent = agent
 
     agent_executor = AgentExecutor(
@@ -169,6 +183,16 @@ def ai_agent(chat_state: GraphState) -> GraphState:
 
     agent_final_answer = agent_executor.invoke(input_variables)
     chat_state["answer"] = agent_final_answer["output"]
+    chat_state["hint"] = (
+        chat_state["hint"]
+        + "・質問："
+        + chat_state["question"]
+        + "\n・回答："
+        + chat_state["answer"]
+        + "\n・解説："
+        + dynamic_callback.llm_comment
+        + "\n"
+    )
 
     # Add tool's outputs to the state.
     for output in dynamic_callback.tool_outputs:
@@ -183,8 +207,8 @@ def ai_agent(chat_state: GraphState) -> GraphState:
 
 
 if __name__ == "__main__":
-    # user_input = "FundastAの有給休暇について説明してください"
-    user_input = "FundastAの住所はどこですか"
+    user_input = "名古屋市の山本幸司さんがCEOをやっているSES会社に育児休暇はありますか"
+    # user_input = "FundastAの住所はどこですか"
     # user_input = "こんにちは、世界で一番高いビルは何ですか"
     # user_input = input("Question :")
 

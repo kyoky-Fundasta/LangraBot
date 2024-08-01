@@ -5,26 +5,24 @@ from langchain_pinecone import PineconeVectorStore
 import traceback
 from module.tools.utils import format_docs
 from langchain.tools.base import BaseTool
-from pydantic import BaseModel, Field
-from langchain.agents import Tool
 from data.test_data.pinecone_test_sample import pinecone_test_sample
-
+from langchain_openai import OpenAIEmbeddings
+from langchain_pinecone import PineconeVectorStore
 
 os.environ["OPENAI_API_KEY"] = env_openai
 os.environ["PINECONE_API_KEY"] = env_pinecone
 
 try:
-    from langchain_openai import OpenAIEmbeddings
-    from langchain_pinecone import PineconeVectorStore
 
-    # embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
-    # vectorstore = PineconeVectorStore.from_existing_index(
-    #     index_name=index_name, embedding=embeddings
-    # )
-    # retriever = vectorstore.as_retriever(
-    #     search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
-    # )
-    # print("\n\n!!!!!Pinecone initialized successfully.!!!!!\n\n")
+    embeddings = OpenAIEmbeddings(openai_api_key=env_openai, model=embedding_model)
+    vectorstore = PineconeVectorStore.from_existing_index(
+        index_name=index_name, embedding=embeddings
+    )
+    retriever = vectorstore.as_retriever(
+        search_type="mmr", search_kwargs={"k": 3, "fetch_k": 6}
+    )
+    print("\n\n!!!!!Pinecone initialized successfully.!!!!!\n\n")
+
 except Exception as e:
     print(f"\n\nError initializing Pinecone: {str(e)}, key : {env_pinecone[:5]}")
     print(f"\n\nError initializing Pinecone: {str(e)}")
@@ -71,11 +69,13 @@ class FundastA_Policy(BaseTool):
 
     def _run(self, input_str: str) -> str:
 
-        # # Retrieves related refence from VectorDB
-        # retrieved_docs = retriever.invoke(input_str)
-        # # Reshape the data
-        # retrieved_docs = format_docs(retrieved_docs)
-        retrieved_docs = pinecone_test_sample
+        # Retrieves related refence from VectorDB
+        retrieved_docs = retriever.invoke(input_str)
+        # Reshape the data
+        retrieved_docs = format_docs(retrieved_docs, input_str)
+
+        ## Return a dummy DB data. To save api calls.
+        # retrieved_docs = pinecone_test_sample
         return "\n\n" + retrieved_docs + "\n\n"
 
     def _arun(self, input_str: str):

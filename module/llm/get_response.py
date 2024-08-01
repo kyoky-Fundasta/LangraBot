@@ -8,40 +8,6 @@ from langchain.tools.base import BaseTool
 from module.llm.BasicTripletChains import gpt_chain, gemini_chain
 
 
-class answering_bot(BaseTool):
-    name: str = "answering_bot"
-    description: str = (
-        "Based on the provided context and web search results, generate an accurate answer."
-    )
-
-    def _run(self, chat_state: GraphState) -> str:
-        selected_model = chat_state["selected_model"]
-        output_parser = StrOutputParser()
-        chat_history_str = "\n".join(
-            [f"ユーザー: {q}\nAI: {a}" for q, a in chat_state["chat_history"]]
-        )
-
-        llm = llm_switch(selected_model)
-
-        prompt = PromptTemplate.from_template(prompt_template)
-        prompt = prompt.partial(
-            context=chat_state["context"],
-            web=chat_state["web"],
-            chat_history=chat_history_str,
-            hint=chat_state["hint"],
-        )
-        input = {"question": chat_state["question"]}
-
-        chain = prompt | llm | output_parser
-
-        answer = chain.invoke(input)
-
-        return answer
-
-    def _arun(self, chat_state: GraphState):
-        raise NotImplementedError("Async method not implemented")
-
-
 def advanced_question(chat_state: GraphState) -> GraphState:
     selected_model = chat_state["selected_model"]
     output_parser = StrOutputParser()

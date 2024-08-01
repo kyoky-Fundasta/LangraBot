@@ -97,7 +97,6 @@ def invoke_chain(app, chat_state, selected_model):
     return final
 
 
-# if __name__ == "__main__":
 def chat(user_question, chat_history, model_name, who):
 
     # Generate answer with LLMphState
@@ -158,7 +157,7 @@ def chat(user_question, chat_history, model_name, who):
             memory = MemorySaver()
             app = workflow.compile(checkpointer=memory)
             config = RunnableConfig(
-                recursion_limit=5, configurable={"thread_id": "CORRECTIVE-SEARCH-RAG"}
+                recursion_limit=2, configurable={"thread_id": "CORRECTIVE-SEARCH-RAG"}
             )
             #   Draw a diagram describing reasoning flow
             # try:
@@ -179,8 +178,8 @@ def chat(user_question, chat_history, model_name, who):
                 for output in app.stream(chat_state, config):
                     last_output = output
                     for key, value in output.items():
-                        pprint.pprint(f"\nOutput from node '{key}':")
-                        pprint.pprint("---")
+                        pprint.pprint(f"\n\n\n------------  Output from node '{key}':")
+                        pprint.pprint("\n")
                         pprint.pprint(value, indent=2, width=80, depth=None)
             except GraphRecursionError as e:
                 print(f"Recursion limit reached: {e}")

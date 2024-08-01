@@ -1,7 +1,8 @@
-fundasta_str = """
+def format_docs(docs, input_query):
+    fundasta_str = f"""
 以下は'FundastA_Policy'ツールから抜粋された就業規則の内容です。
 この資料の内容からユーザーの質問に関連する情報があるか確認してください。
-・ユーザーの質問：{question}
+・ユーザーの質問：{input_query}
 
 ・就業規則の内容：
 本規則は、株式会社FundastA（以下、会社という）の従業員の労働条件、服務規律その他の就業に関す
@@ -11,17 +12,6 @@ fundasta_str = """
 
 """
 
-web_str = """
-以下は'web_search'ツールを利用して、オンラインでユーザーの質問を検索した結果です。
-この検索結果からユーザーの質問に関連する情報があるか確認してください。
-・ユーザーの質問：{question}
-
-・検索結果：
-
-"""
-
-
-def format_docs(docs):
     return "\n".join(
         [
             f"<document><content>{fundasta_str}\n{doc.page_content}</content><source>FundastA 就業規則 PDFファイル</source><page>{int(doc.metadata['page-number'])+1}</page></document>"
@@ -30,7 +20,15 @@ def format_docs(docs):
     )
 
 
-def format_searched_docs(docs):
+def format_searched_docs(docs, input_query):
+    web_str = f"""
+以下は'web_search'ツールを利用して、オンラインでユーザーの質問を検索した結果です。
+この検索結果からユーザーの質問に関連する情報があるか確認してください。
+・ユーザーの質問：{input_query}
+
+・検索結果：
+
+"""
     return "\n".join(
         [
             f"<document><content>{web_str}\n{doc['content']}</content><source>{doc['url']}</source></document>"
