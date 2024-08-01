@@ -23,42 +23,36 @@ class web_search(BaseTool):
 
     def _run(self, input_str: str):
 
-        search = TavilySearchAPIWrapper()
-        search_tool = TavilySearchResults(max_results=5, api_wrapper=search)
-        search_result = search_tool.invoke({"query": input_str})
+        # search = TavilySearchAPIWrapper()
+        # search_tool = TavilySearchResults(max_results=5, api_wrapper=search)
+        # search_result = search_tool.invoke({"query": input_str})
 
-        search_result = format_searched_docs(search_result)
-        # print("\n\nClass :", type(search_result), search_result)
-        return "\n\n" + search_result + "\n\n"
+        # search_result = format_searched_docs(search_result)
+        # # print("\n\nClass :", type(search_result), search_result)
+        # return "\n\n" + search_result + "\n\n"
+        return tavily_result2
 
     def _arun(self, input_str: str):
         raise NotImplementedError("Async method not implemented")
 
 
-# Web search API
-def search_on_web(state: GraphState) -> GraphState:
-    # # Tavily web search
-    # search = TavilySearchAPIWrapper()
-    # search_tool = TavilySearchResults(max_results=6, api_wrapper=search)
-    # search_result = search_tool.invoke({"query": state["question"]})
+# # Web search API
+# def search_on_web(state: GraphState) -> GraphState:
+#     # Tavily web search
+#     search = TavilySearchAPIWrapper()
+#     search_tool = TavilySearchResults(max_results=6, api_wrapper=search)
+#     search_result = search_tool.invoke({"query": state["question"]})
 
-    # # # Test data for saving tavily search api fee
-    # # search_result = tavily_result1
+#     # # Test data for saving tavily search api fee
+#     # search_result = tavily_result1
 
-    # # print("##Tavily:", search_result)
-    # # Reshape the search_result
-    # search_result = format_searched_docs(search_result)
-
-    # # Preserve it in the state.
-    # return GraphState(
-    #     question=state["question"],
-    #     context=state["context"],
-    #     web=search_result,
-    #     chat_history=state["chat_history"],
-    #     answer=state["answer"],
-    #     relevance=state["relevance"],
-    # )
-    return tavily_result2
+#     # print("##Tavily:", search_result)
+#     # Reshape the search_result
+#     search_result = format_searched_docs(search_result)
+#     state["web"]=search_result
+#     # Preserve it in the state.
+#     return state
+#     # return tavily_result2
 
 
 if __name__ == "__main__":

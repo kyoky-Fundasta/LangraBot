@@ -1,11 +1,56 @@
-gemini_json = {
-    "result": "grounded",
-    "Reasoning": "FundastAのウェブサイトに、2021年6月時点での従業員数が7名と記載されています。",
-    "Source": "https://fundasta.co.jp/",
-}
+a = "\n\n<document><content>\n本規則は、株式会社FundastA（以下、会社という）の従業員の労働条件、服務規律その他の就業に関す\nる事項を定める。この規則は、株式会社FundastA(以下「当社」とする)の全ての従業員に適⽤します。ただし、期間を定め\nて雇⽤される契約従業員・パートタイマー・アルバイト、定年後に期間を定めて雇⽤される嘱託従業員\nの就業に関する必要な事項については、個別に結ぶ雇⽤契約書を適⽤して、本規則は適⽤しない。\n\n\n就業規則第１章 総則第１条（⽬的）1. 本規則は、株式会社FundastA（以下、会社という）の従業員の労働条件、服務規律その他の就業に関する事項を定める。 2. 本規則により、会社業務の円滑な運営と会社秩序の維持、従業員の⾃⼰成⻑を図るものとする。 3. この規則に定めのない事項については、労働基準法その他の法令の定めるところを勘案し、新たな規則を作成するものとする。 その際会社は従業員の意⾒を求めることがある。 第２条（適⽤範囲）1. この 規則は、株式会社FundastA(以下「当社」とする)の全ての従業員に適⽤します。 ただし、期間を定めて雇⽤される契 約従業員・パートタイマー・アルバイト、定年後に期間を定めて雇⽤される嘱託従業員の就業に関する必要な事項については、個別に結ぶ雇⽤契約書を適⽤して、本規則は適⽤しない。 2. 労働基準法第41条に規定する管理若しくは監督の地位にある者または機密の事務を取り扱う者については、「労働時間、休憩および休⽇に関する規定」は適⽤しない。 3. 契約従業員、パートタイマー、アルバイトおよび嘱託従業員については、退職⾦規定は適⽤しない。 （退職⾦ は⽀給しない）第３条（規則の遵守）会社及び従業員は、ともにこの規則を守り、相協⼒して社業の発展に努めなければならない。 第２章 採⽤、異動等第４条（採⽤⼿続）1. ⼊社を希望する者の中から選考試験、および⾯談を⾏い、 当社に必要とされたものを採⽤する。 2. 採⽤後に採⽤を取り消す場合、速やかに当社より対象者に連絡および採⽤を取り消した旨の書⾯を送付する提出されたすべての書類はこれに同封して返送を⾏う。 第５条（採⽤時の提出書類）1. 従業員に採⽤された者は、次の書類を採⽤⽇から2週間以内に提出、またはSmartHRへ⼊⼒しなければならない。 i. 履歴書ii. 住⺠票記載事項証明書 (※全部省略で可)iii. 前職者にあっては、年⾦⼿帳及び雇⽤保険被保険者証、前職 の源泉徴収票iv. 給与振込時に必要な情報 (通帳の⾒開き1ページ⽬のコピー)v. ⾃動⾞運転免許証の写し (ただし、 ⾃動⾞運転免許証を有する場合に限る)。 vi. そのほか会社が指定するもの通勤に関する申請書(会社指定)雇⽤契約書件就業条件明⽰書の会社保管分2. 前項の提出書類の記載事項に変更が⽣じたときは、速やかにこれを届け出なければ ならない。</content><source>FundastA 就業規則 PDFファイル</source><page>2</page></document>\n<document><content>\n本規則は、株式会社FundastA（以下、会社という）の従業員の労働条件、服務規律その他の就業に関す\nる事項を定める。この規則は、株式会社FundastA(以下「当社」とする)の全ての従業員に適⽤します。ただし、期間を定め\nて雇⽤される契約従業員・パートタイマー・アルバイト、定年後に期間を定めて雇⽤される嘱託従業員\nの就業に関する必要な事項については、個別に結ぶ雇⽤契約書を適⽤して、本規則は適⽤しない。\n\n\n）i. 試⽤期間の賃⾦︓ 190,000ii. 準委任契約業務従事者契約単価に対する45%４５% が 200,000 に達しない場合の 最低賃⾦は 200,000 とするただし、最⼤ 500,000 とする採⽤時の賃⾦︓ 200,000準委任契約業務に従事していない間の賃⾦iii. その他業務従事者基本給︓200,000〜iv. アルバイトプログラム未経験者︓1,200/hプログラム経験者︓1,500/h〜2. 就業場所i. 名古屋市近郊ii. 名古屋市本社iii. 従業員⾃宅⾃宅の環境が著しく業務に⽀障がある場合その 限りではない秘密保持契約を結んだ業務に従事している場合、⾃宅以外の場所での就業は原則認められない3. 従事す る業務i. システム開発請負業務ii. ⾃社サービス開発業務iii. 営業今後その他の業務が発⽣した場合、従事する可能性があります。 第３１条（基本給・資産形成 DB ⼿当）基本給は、職務内容技能勤成績等を考慮して各別に決定する 。 請負業務従事者は契約単価の45%が全額基本給となる基本給には資産形成 DB ⼿当を含むものとし、資産形成 DB ⼿当は、別に定める資産形成 DB ⼿当給付規程のとおり⽀給する。 第３２条（家族⼿当）⽀給なし第３３条（通勤⼿当 ）通勤⼿当は、⽉額3万円までの範囲内において、通勤に要する実費に相当する額を⽀給する。 第３４条（役付⼿当）現場リーダー⼿当︓ 2,000 / 部下1名請負業務に従事する者のうち、就業先にて教育・就業管理を⾏うべき当社従業員を持つこと。 プロジェクトリーダー⼿当︓ 20,000⾃社サービス開発にてプロジェクトリーダーの任を受けていること。 プロジェクトマネージャー⼿当︓ 50,000⾃社サービス開発にてプロジェクトマネージャーの任を受けていること。 第３５条（技能・資格⼿当及び補助⾦）業務及び勉強⽤図書の購⼊、または有料セミナーへの参加に限り、上限 3,000/⽉ を⽀給領収書、または購⼊レシートを添付した経費精算書を、会社の規定するフォーマットで提出すること清算 可能な購⼊⽇は、申請の1ヶ⽉前までのものとする清算は申請⽉の翌⽉に⾏われるガジェット⼿当上限 24,000/年（5⽉〜翌年4⽉︓FundastA の期初〜期末） を⽀給領収書、または購⼊レシートを添付した経費精算書を、会社の規定する フォーマットで提出すること清算可能な購⼊⽇は、申請の1ヶ⽉前までのものとする清算は申請⽉の翌⽉に⾏われる⾃ 主学習のための最新ガジェットの購⼊や、在宅勤務で必要になる机や椅⼦などの購⼊費を補助する在宅勤務⼿当 5,000/⽉ を⽀給在宅勤務⽇が⽉の勤務⽇の 75％ 以上の場合⽀給会社ブログ投稿⼿当 500/1記事 を⽀給会社YouTube投稿⼿当 1,000/⽉ を⽀給物価⾼騰⼿当 10,000/⽉ を⽀給今後の物価上昇に伴い増減あり第３６条（精勤⼿当）⽀給なし。 第３７条（割増賃⾦）1. 時間外労働に対する割増賃⾦は、次の割増賃⾦率に基づき、次項の計算⽅法により⽀給する 。</content><source>FundastA 就業規則 PDFファイル</source><page>10</page></document>\n<document><content>\n本規則は、株式会社FundastA（以下、会社という）の従業員の労働条件、服務規律その他の就業に関す\nる事項を定める。この規則は、株式会社FundastA(以下「当社」とする)の全ての従業員に適⽤します。ただし、期間を定め\nて雇⽤される契約従業員・パートタイマー・アルバイト、定年後に期間を定めて雇⽤される嘱託従業員\nの就業に関する必要な事項については、個別に結ぶ雇⽤契約書を適⽤して、本規則は適⽤しない。\n\n\ni. 労務提供上の⽀障がある場合ii. 企業秘密が漏洩する場合iii. 会社の名誉や信⽤を損なう⾏為や、信頼関係を破壊する⾏為がある場合iv. 競業により企業の利益を害する場合( )附則 施⾏期⽇第１条 この規則は、平成３１年１⽉１ ⽇から施⾏する第２条 資産形成DB⼿当に関する規則は、令和４年１１⽉１⽇から施⾏する。 福祉はぐくみ企業年⾦基⾦に係る取扱い規程第１条（⽬的）1. この規程は、株式会社FundastA（以下、「当社」という。 ）の退職⾦制度として、福祉はぐくみ企業年⾦基⾦（以下、「基⾦」という。 ）における取扱いについて定めることを⽬的とする。 2.  この規程は、以下に掲げる当社の厚⽣年⾦保険の適⽤事業所に適⽤する。 株式会社FundastA第２条（加⼊者）基⾦へ の加⼊者の範囲は、満70歳未満の厚⽣年⾦被保険者である者のうち、基⾦への加⼊を希望する者とする。 第３条（基 準給与⽉額）基⾦の給付額および掛⾦額の算定の基礎となる基準給与⽉額(DB給与⽉額)は、資産形成DB⼿当給付規程(2022年11⽉1⽇現在において効⼒を有するものとする。 )第3条第3号に定める退職⾦積⽴の⽉額とする。  ただし、基⾦の⽼齢給付⾦の⽀給が開始された⽉(基⾦規約第60条の⼀時⾦の⽀給を申し出た場合は、当該申し出た⽉の翌⽉)以降の各⽉の基準給与⽉額は、零とする。 第４条（休職等の期間の取扱い）次の各号に定める期間のいずれか(以下、「休職等」という。 )を開始する場合には、当該開始する⽇に、基⾦の加⼊者の資格を喪失するものとする。  なお、休職等の期間が終了した場合には、その翌⽇に加⼊者の資格を再取得するものとする。 1. 就業規則（2022年11⽉1⽇現在に おいて効⼒を有するものとする。 以下同じ。 ) 第9条に定める休職期間2. 就業規則第26条に定める育児休業期間3.  就業規則第26条に定める介護休業期間第５条（基⾦への届出）この規程を制定または変更する場合は、あらかじめ、基⾦に届出するものとする。  なお、この規程の内容については、法令等および基⾦の取扱い基準に準拠している旨の確認を、あらかじめ、基⾦から受けるものとする。 付則（施⾏⽇）この規程は、2022年11⽉1⽇から施⾏する。 DB資産 形成 ⼿当給付規程第１条（⽬的）この規程は、当社に勤務する者の将来の⽣活と現在の⽣活の充実を⽬的とする資産 形成DB⼿当について定める。</content><source>FundastA 就業規則 PDFファイル</source><page>19</page></document>\n\n"
+TypeError("BaseModel.__init__() takes 1 positional argument but 2 were given")
 
-gpt_json = {
-    "result": "grounded",
-    "Reasoning": "FundastAの社員数は2021年6月時点で7名であることが、提供された文書に記載されています。",
-    "Source": "https://fundasta.co.jp/",
-}
+
+LLMResult(
+    generations=[
+        [
+            ChatGeneration(
+                text="この情報だけでは、日本の首都に関する情報は得られません。このツール出力は、株式会社FundastAの就業規則に関するものです。日本の首都に関する情報を得るには、別の情報源を参照する必要があります。 \n",
+                generation_info={
+                    "finish_reason": "STOP",
+                    "safety_ratings": [
+                        {"category": 9, "probability": 1, "blocked": False},
+                        {"category": 8, "probability": 1, "blocked": False},
+                        {"category": 7, "probability": 1, "blocked": False},
+                        {"category": 10, "probability": 1, "blocked": False},
+                    ],
+                },
+                message=AIMessage(
+                    content="この情報だけでは、日本の首都に関する情報は得られません。このツール出力は、株式会社FundastAの就業規則に関するものです。日本の首都に関する情報を得るには、別の情報源を参照する必要があります。 \n",
+                    response_metadata={
+                        "finish_reason": "STOP",
+                        "safety_ratings": [
+                            {"category": 9, "probability": 1, "blocked": False},
+                            {"category": 8, "probability": 1, "blocked": False},
+                            {"category": 7, "probability": 1, "blocked": False},
+                            {"category": 10, "probability": 1, "blocked": False},
+                        ],
+                    },
+                    id="run-bb9ef6d2-3aaa-41eb-ac6a-6fc0ab91ad6b-0",
+                ),
+            )
+        ]
+    ],
+    llm_output={},
+    run=None,
+)
+
+PromptTemplate(
+    input_variables=["agent_scratchpad", "history", "question"],
+    partial_variables={
+        "tools": "FundastA_Policy: FundastAの就業規則の内容が確認できるツールです。\n    ユーザーがFundastAについて質問している場合、特に就業規則について\n    質問しているときに、関連する内容を捜すことが出来ます。関連する内容が\n    あった場合にはそれを使ってユーザーの質問に答えてください。\n    このツールは一つの質問に対して一回だけ使えます。\n    一度使ったらほかのツールを使って関連情報を検索してください。\nweb_search: ウェブの情報を検索してユーザーの質問に答えることが出来ます。\n        以下の時にはこのツールを使ってください。\n        １．Fundasta_policyツールを使ったがユーザーの質問に答えることが出来なかった。\n        ２．ユーザーがリアルタイム情報について質問をした。\n        ３．ユーザーがLLMがまだ学習をしていない最近の情報について質問をした。\n        ４．他のツールでユーザーの質問に答えることが出来なかった時、最後にこのツールを使ってみてください\n        \nanswering_bot: Based on the provided context and web search results, generate an accurate answer.",
+        "tool_names": "FundastA_Policy, web_search, answering_bot",
+    },
+    metadata={
+        "lc_hub_owner": "hwchase17",
+        "lc_hub_repo": "react",
+        "lc_hub_commit_hash": "d15fe3c426f1c4b3f37c9198853e4a86e20c425ca7f4752ec0c9b0e97ca7ea4d",
+    },
+    template="\nYou are an intelligent AI agent.\nAnswer the following questions by referring to the provided chat history.\nUse the historical context to better understand the current question and provide a more accurate and relevant answer.\n\nYou have access to the following tools: {tools}\n\nUse the following format:\n\nQuestion: input question you must answer.\nChat history: record of previous interactions between the user and the AI agent.\n\nThought: you should always think about what to do. If you have already used the FundastA_Policy tool, it is recommended to use the 'web_search' tool next.\n\nAction: the action to take, should be one of [{tool_names}]. Note: You can only use the FundastA_Policy tool once; after that, use another appropriate tool.\n\nAction Input: the input to the action\nObservation: the result of the action\n\n... (this Thought/Action/Action Input/Observation can repeat 3 times)\n\nThought: After getting the result of the action, check whether you can find relevant information for the question.\n    - Pattern 1: I now know the final answer (for cases where you know the final answer without using any tools).\n    - Pattern 2: I found relevant information from the result of the action and now I know the final answer (for cases where you used a tool and found relevant information).\n    - Pattern 3: I was not able to find relevant information from the FundastA_Policy tool's output. Then, try 'web_search' tool. If you find relevant information from web_search output, use it to generate the answer.\nFinal Answer: the final answer to the original input question in Japanese.  \n\nImportant:\n1. The agent should judge whether it needs tools or not to generate the answer for the question.\n2. If no tools are used, do the best to generate an accurate answer. If tools are used, check for relevant information in the output. If relevant information is found, use it to generate the answer.\n3. Do not use FundastA_Policy tool more than once. If the question cannot be answered using the FundastA_Policy tool, use the web_search tool. If relevant information is found from web_search, use it to generate the answer.\n\n\nThe final answer must always be in Japanese.\n\nBegin!\n\nChat history: {history}\nQuestion: {question}\nThought: {agent_scratchpad}\n",
+)
+
+
+[
+    "Human: \nYou are an intelligent AI agent.\nAnswer the following questions by referring to the provided chat history.\nUse the historical context to better understand the current question and provide a more accurate and relevant answer.\n\nYou have access to the following tools: FundastA_Policy: FundastAの就業規則の内容が確認できるツールです。\n    ユーザーがFundastAについて質問している場合、特に就業規則について\n    質問しているときに、関連する内容を捜すことが出来ます。関連する内容が\n    あった場合にはそれを使ってユーザーの質問に答えてください。\n    このツールは一つの質問に対して一回だけ使えます。\n    一度使ったらほかのツールを使って関連情報を検索してください。\nweb_search: ウェブの情報を検索してユーザーの質問に答えることが出来ます。\n        以下の時にはこのツールを使ってください。\n        １．Fundasta_policyツールを使ったがユーザーの質問に答えることが出来なかった。\n        ２．ユーザーがリアルタイム情報について質問をした。\n        ３．ユーザーがLLMがまだ学習をしていない最近の情報について質問をした。\n        ４．他のツールでユーザーの質問に答えることが出来なかった時、最後にこのツールを使ってみてください\n        \nanswering_bot: Based on the provided context and web search results, generate an accurate answer.\n\nUse the following format:\n\nQuestion: input question you must answer.\nChat history: record of previous interactions between the user and the AI agent.\n\nThought: you should always think about what to do. If you have already used the FundastA_Policy tool, it is recommended to use the 'web_search' tool next.\n\nAction: the action to take, should be one of [FundastA_Policy, web_search, answering_bot]. Note: You can only use the FundastA_Policy tool once; after that, use another appropriate tool.\n\nAction Input: the input to the action\nObservation: the result of the action\n\n... (this Thought/Action/Action Input/Observation can repeat 3 times)\n\nThought: After getting the result of the action, check whether you can find relevant information for the question.\n    - Pattern 1: I now know the final answer (for cases where you know the final answer without using any tools).\n    - Pattern 2: I found relevant information from the result of the action and now I know the final answer (for cases where you used a tool and found relevant information).\n    - Pattern 3: I was not able to find relevant information from the FundastA_Policy tool's output. Then, try 'web_search' tool. If you find relevant information from web_search output, use it to generate the answer.\nFinal Answer: the final answer to the original input question in Japanese.  \n\nImportant:\n1. The agent should judge whether it needs tools or not to generate the answer for the question.\n2. If no tools are used, do the best to generate an accurate answer. If tools are used, check for relevant information in the output. If relevant information is found, use it to generate the answer.\n3. Do not use FundastA_Policy tool more than once. If the question cannot be answered using the FundastA_Policy tool, use the web_search tool. If relevant information is found from web_search, use it to generate the answer.\n\n\nThe final answer must always be in Japanese.\n\nBegin!\n\nChat history: \nQuestion: FundastAの住所はどこですか\nThought: \n"
+]

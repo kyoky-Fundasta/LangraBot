@@ -1,21 +1,16 @@
 # Fixed the agent's inappropriate behavir by AgentExecutor's callback parameter.
 # Check the line no.92 and DynamicPromptCallback class
 
-from langchain import hub
 from langchain.agents import AgentExecutor, create_react_agent
-from langchain_google_genai import ChatGoogleGenerativeAI
 from data.const import (
-    env_genai,
+    llm_switch,
     gemini_model_name,
     GraphState,
-    env_openai,
     gpt_model_name,
     gpt_mini_model_name,
 )
 from module.vector.pineconeDB import FundastA_Policy
 from module.web.tavily import web_search
-from data.const import env_genai
-from langchain_openai import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
 from data.prompt_templates.advanced_agent_template import prompt_template
 from data.prompt_templates.default_template import prompt_template as default_template
@@ -79,19 +74,8 @@ def ai_advanced_agent(chat_state: GraphState) -> GraphState:
         chat_history_str
         + f'\nユーザー:{chat_state["question"]}\nAI:{chat_state["answer"]},{chat_state["reasoning"]}'
     )
-    if selected_model == "Gemini_1.5_Flash":
-        llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
-            google_api_key=env_genai,
-            temperature=0,
-            convert_system_message_to_human=True,
-        )
-    elif selected_model == "ChatGPT_3.5":
-        llm = ChatOpenAI(
-            temperature=0, model="gpt-3.5-turbo-0125", openai_api_key=env_openai
-        )
-    elif selected_model == "ChatGPT_4o_mini":
-        llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", openai_api_key=env_openai)
+
+    llm = llm_switch(selected_model)
 
     prompt = default_template
     prompt.template = prompt_template

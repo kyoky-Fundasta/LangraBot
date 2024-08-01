@@ -1,14 +1,45 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
 from data.const import GraphState
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from data.prompt_templates.advanced_question_template import prompt_template
-from data.const import env_genai, env_openai, gemini_model_name, gpt_mini_model_name
+from data.const import gemini_model_name, gpt_mini_model_name, llm_switch
 from langchain_core.prompts import PromptTemplate
-
-# from langchain_core.output_parsers import CommaSeparatedListOutputParser
+from langchain.tools.base import BaseTool
 from module.llm.BasicTripletChains import gpt_chain, gemini_chain
+
+
+class answering_bot(BaseTool):
+    name: str = "answering_bot"
+    description: str = (
+        "Based on the provided context and web search results, generate an accurate answer."
+    )
+
+    def _run(self, chat_state: GraphState) -> str:
+        selected_model = chat_state["selected_model"]
+        output_parser = StrOutputParser()
+        chat_history_str = "\n".join(
+            [f"ユーザー: {q}\nAI: {a}" for q, a in chat_state["chat_history"]]
+        )
+
+        llm = llm_switch(selected_model)
+
+        prompt = PromptTemplate.from_template(prompt_template)
+        prompt = prompt.partial(
+            context=chat_state["context"],
+            web=chat_state["web"],
+            chat_history=chat_history_str,
+            hint=chat_state["hint"],
+        )
+        input = {"question": chat_state["question"]}
+
+        chain = prompt | llm | output_parser
+
+        answer = chain.invoke(input)
+
+        return answer
+
+    def _arun(self, chat_state: GraphState):
+        raise NotImplementedError("Async method not implemented")
 
 
 def advanced_question(chat_state: GraphState) -> GraphState:
@@ -18,25 +49,14 @@ def advanced_question(chat_state: GraphState) -> GraphState:
     chat_history_str = "\n".join(
         [f"ユーザー: {q}\nAI: {a}" for q, a in chat_state["chat_history"]]
     )
-    if selected_model == "Gemini_1.5_Flash":
-        llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
-            google_api_key=env_genai,
-            temperature=0,
-            convert_system_message_to_human=True,
-        )
-    elif selected_model == "ChatGPT_3.5":
-        llm = ChatOpenAI(
-            temperature=0, model="gpt-3.5-turbo-0125", openai_api_key=env_openai
-        )
-    elif selected_model == "ChatGPT_4o_mini":
-        llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", openai_api_key=env_openai)
+
+    llm = llm_switch(selected_model)
 
     prompt = PromptTemplate.from_template(prompt_template)
     prompt = prompt.partial(
         context=chat_state["context"],
         web=chat_state["web"],
-        history=chat_state["chat_history"],
+        chat_history=chat_history_str,
         hint=chat_state["hint"],
     )
     input = {"question": chat_state["question"]}
@@ -44,7 +64,7 @@ def advanced_question(chat_state: GraphState) -> GraphState:
     chain = prompt | llm | output_parser
 
     advance_output_str = chain.invoke(input)
-    print(type(advance_output_str, advance_output_str))
+    print(type(advance_output_str), advance_output_str)
     chat_state["answer"] = advance_output_str
     return chat_state
 
