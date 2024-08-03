@@ -8,15 +8,27 @@ from langchain.agents import (
     AgentExecutor,
     create_react_agent,
 )
+from langchain.agents.react.base import ReActDocstoreAgent
+from langchain.prompts import PromptTemplate
+from langchain.tools import BaseTool
+from langchain.chains import LLMChain
+from langchain.agents import Agent, BaseSingleActionAgent
+from langchain.schema import AgentAction, AgentFinish
+from langchain.agents.agent import BaseSingleActionAgent
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain_core.outputs import LLMResult
-from typing import Dict, Any, Optional
+from langchain_core.output_parsers import StrOutputParser
+
+from typing import Dict, Any, Optional, Tuple
 from typing import Any, Dict, List, Union
 
 
 from module.vector.pineconeDB import FundastA_Policy
 from module.web.tavily import web_search
 
+from data.prompt_templates.agent_callback_tempalte import (
+    prompt_template as callback_template,
+)
 from data.prompt_templates.agent_template import prompt_template, agent_updated_template
 from data.prompt_templates.default_template import prompt_template as default_template
 from data.const import (
@@ -32,8 +44,9 @@ from data.const import (
 
 
 class DynamicPromptCallback(BaseCallbackHandler):
-    def __init__(self, agent):
+    def __init__(self, agent, llm):
         super().__init__()
+        self.llm = llm
         self.agent = agent
         self.original_question = None
         self.tool_outputs = []
@@ -42,6 +55,17 @@ class DynamicPromptCallback(BaseCallbackHandler):
         self.tool_counter = 1
         self.action_count = 1
         self.llm_comment = ""
+        self.refined_output = ""
+
+    def refine_failed_response(self):
+        parser = StrOutputParser()
+        prompt = PromptTemplate.from_template(callback_template)
+        prompt = prompt.partial(comments=self.llm_comment)
+        input = {"question": self.original_question}
+
+        chain = prompt | self.llm | parser
+        response = chain.invoke(input)
+        return response
 
     def trim_llm_text(self, llm_text: str) -> str:
         pattern = r"Thought:(.*?)Action:"
@@ -116,16 +140,26 @@ class DynamicPromptCallback(BaseCallbackHandler):
         print(f"\n\n-----------#{self.tool_counter} : Tool ended----------------\n")
         self.tool_counter += 1
 
-    def on_chain_end(
+    def on_agent_finish(
         self,
-        outputs: Dict[str, Any],
+        finish: AgentFinish,
         *,
         run_id: UUID,
-        parent_run_id: UUID | None = None,
+        parent_run_id: Optional[UUID] = None,
+        tags: Optional[List[str]] = None,
         **kwargs: Any,
-    ) -> Any:
-        # print(f"\n------------------Chain end : {outputs}\n")
-        print(f"\n------------------Chain end : \n")
+    ) -> None:
+        if (
+            finish.return_values["output"]
+            == "Agent stopped due to iteration limit or time limit."
+        ):
+            self.refined_output = self.refine_failed_response()
+
+            try:
+                finish.return_values["output"] = self.refined_output
+            except:
+                print("hohoho")
+        print("\n\n---------------Agent finished\n\n")
 
     def on_llm_end(
         self,
@@ -135,12 +169,31 @@ class DynamicPromptCallback(BaseCallbackHandler):
         parent_run_id: Optional[UUID] = None,
         **kwargs: Any,
     ) -> None:
-
-        trimmed_comment = self.trim_llm_text(response.generations[0][0].text)
-        self.llm_comment = self.llm_comment + trimmed_comment
+        if self.action_count < 4:
+            trimmed_comment = self.trim_llm_text(response.generations[0][0].text)
+            self.llm_comment = self.llm_comment + trimmed_comment
         print(
             f"\n------------------LLM end : \n{self.llm_comment}\n--------------------"
         )
+
+    def on_chain_end(
+        self,
+        outputs: Dict[str, Any],
+        *,
+        run_id: UUID,
+        parent_run_id: UUID | None = None,
+        **kwargs: Any,
+    ) -> Any:
+        print(f"\n------------------Chain end : {outputs}\n")
+
+        # if outputs["output"] == "Agent stopped due to iteration limit or time limit.":
+        #     self.refined_output = self.refine_failed_response()
+        #     try:
+        #         outputs["output"] = "hahaha"
+        #     except:
+        #         print("hohoho")
+
+        print(f'\n------------------Chain end : {outputs["output"]}\n')
 
 
 # This is the first agent the main app calls. I expect most questions should be solved by this.
@@ -153,7 +206,7 @@ def ai_agent(chat_state: GraphState) -> GraphState:
     llm = llm_switch(selected_model)
 
     # Initiate a callback instance and integrate it with llm, tools and agent.
-    dynamic_callback = DynamicPromptCallback(None)
+    dynamic_callback = DynamicPromptCallback(None, llm)
     llm.callbacks = [dynamic_callback]
     prompt = default_template
     # prompt.template = prompt_template
@@ -163,9 +216,7 @@ def ai_agent(chat_state: GraphState) -> GraphState:
         web_search(callbacks=[dynamic_callback]),
     ]
     agent = create_react_agent(
-        llm,
-        tools,
-        prompt=prompt,
+        llm=llm, tools=tools, prompt=prompt, stop_sequence=["Observation"]
     )
     dynamic_callback.agent = agent
 

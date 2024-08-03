@@ -12,16 +12,20 @@ prompt_template = PromptTemplate(
     You are an intelligent AI agent.
 
     Answer the following questions as best you can. 
-    You have access to the following tools:\n\n{tools}\n\n
-    Use the following format:\n\n
-    Chat history: record of previous interactions between the user and the AI agent.\n
     Question: the input question you must answer\n
+    Chat history: record of previous interactions between the user and the AI agent.\n
+  
+    You have access to the following tools:\n\n{tools}\n\n
+    
+    Use the following format:\n\n
+
     Thought: you should always think about what to do\n
     Action: the action to take, should be one of [{tool_names}]\n
     Action Input: the input to the action\n
     Observation: the result of the action\n
-    ... (this Thought/Action/Action Input/Observation can repeat 3 times)\n
-    Thought: I now know the final answer\nFinal Answer: the final answer to the original input question in Japanese\n\n
+    ... (this Thought/Action/Action Input/Observation can repeat 3 times.  On the 3rd iteration, generate your best answer or say 'I do not know' with the reason why.)\n
+    Thought: I now know the final answer\
+    Final Answer: the final answer to the original input question in Japanese\n\n
 
     Important : If the question is easy and can be answered without any tools, you should instantly generate a final answer and close the chain without using any tools.
 

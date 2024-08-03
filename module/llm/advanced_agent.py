@@ -177,7 +177,7 @@ def ai_advanced_agent(chat_state: GraphState) -> GraphState:
         max_iterations=3,
         return_intermediate_steps=True,
         callbacks=[dynamic_callback],
-        early_stopping_method="force",
+        early_stopping_method="generate",
     )
     result = agent_executor.invoke(
         {
