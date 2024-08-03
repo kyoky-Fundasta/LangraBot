@@ -65,6 +65,7 @@ class DynamicPromptCallback(BaseCallbackHandler):
 
         chain = prompt | self.llm | parser
         response = chain.invoke(input)
+        self.llm_comment += " \n#以上の内容からの総合的な結論：" + response
         return response
 
     def trim_llm_text(self, llm_text: str) -> str:
@@ -240,7 +241,7 @@ def ai_agent(chat_state: GraphState) -> GraphState:
         + chat_state["question"]
         + "\n・回答："
         + chat_state["answer"]
-        + "\n・解説："
+        + "\n・回答の根拠："
         + dynamic_callback.llm_comment
         + "\n"
     )
