@@ -35,3 +35,20 @@ def format_searched_docs(docs, input_query):
             for doc in docs
         ]
     )
+
+
+def format_searched_google(docs, input_query):
+    web_str = f"""
+以下は'web_search'ツールを利用して、オンラインでユーザーの質問を検索した結果です。
+この検索結果からユーザーの質問に関連する情報があるか確認してください。
+・ユーザーの質問：{input_query}
+
+・検索結果：
+
+"""
+    return "\n".join(
+        [
+            f"<document><content>{web_str}\n{doc['title']} : {doc['snippet']}</content><source>{doc['formattedUrl']}</source></document>"
+            for doc in docs
+        ]
+    )
