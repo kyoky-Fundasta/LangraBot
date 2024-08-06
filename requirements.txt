@@ -1,7 +1,7 @@
 python-dotenv
-langchain
+langcahain
 langchain-core
-langchain-openai
+lngchain-openai
 langchain-pinecone
 langchain-upstage
 langchain-community
@@ -11,7 +11,15 @@ text-tools
 langchain-google-genai==0.0.6
 base_agent
 requests
+google-ai-generativelanguage
 google-api-core
+google-auth
+google-generativeai
+requests
+googleapis-common-protos
+protobuf
+cffi
+cryptography
 # blinker
 # typing_extensions
 # protobuf
