@@ -17,31 +17,6 @@ from module.llm.relevancy_test import groundedness_check, is_grounded
 from module.llm.editor import rewrite_question
 
 
-def summarize_final_answer(chat_state):
-    final_response = {
-        "question": "",
-        "answer": "",
-        "relevance": "",
-        "reasoning": "",
-        "source": "",
-    }
-    if chat_state["relevance"] == "grounded":
-        final_response["question"] = chat_state["question"]
-        final_response["answer"] = chat_state["answer"]
-        final_response["relevance"] = chat_state["relevance"]
-        final_response["reasoning"] = chat_state["reasoning"]
-        final_response["source"] = chat_state["source"]
-    else:
-        final_response["question"] = chat_state["question"]
-        final_response["answer"] = (
-            "申し訳ありません。詳しい情報が見つかりませんでした。担当部署にお問い合わせください。"
-        )
-        final_response["relevance"] = chat_state["relevance"]
-        final_response["reasoning"] = chat_state["reasoning"]
-        final_response["source"] = chat_state["source"]
-    return final_response
-
-
 def invoke_chain(app, chat_state, selected_model):
 
     invoke_config = RunnableConfig(
@@ -110,23 +85,29 @@ def chat(user_question, chat_history, model_name, who):
     elif who == "FundastA_社員":
         chat_state_agent = ai_agent(chat_state)
         if chat_state["context"] == "" and chat_state["web"] == "":
-            print(
-                f"\n\n----------------No Groundedness check---------------------\n\n",
-                chat_state,
-            )
+            chat_state["response_type"] = 0
+            print("\n\n---------Routine 0------------\n\n", chat_state)
             return chat_state
         else:
             chat_state = groundedness_check(chat_state_agent)
 
         if chat_state["relevance"] == "grounded":
-            _ = summarize_final_answer(chat_state)
+            chat_state["response_type"] = 1
             print(
                 f'\n\n----------------Entering routine 1 : {chat_state["relevance"]}---------------------\n\n',
                 chat_state,
             )
-            return _
+            return chat_state
+        elif (
+            chat_state["relevance"] == "not grounded"
+            or chat_state["relevance"] == "not sure"
+        ):
+            chat_state["response_type"] = -1
+            print("\n\n---------Routine -1------------\n\n", chat_state)
 
-        else:
+            return chat_state
+
+        elif chat_state["relevance"] == "under my consideration":
             print(
                 f'\n\n----------------Entering routine 2 : {chat_state["relevance"]}---------------------\n\n',
                 chat_state,
@@ -187,10 +168,10 @@ def chat(user_question, chat_history, model_name, who):
             except GraphRecursionError as e:
                 print(f"Recursion limit reached: {e}")
 
-            _ = summarize_final_answer(chat_state)
+            chat_state["response_type"] = 0
             print("\n\n----------------Answering routine 2---------------------\n\n", _)
 
-            return _
+            return 0
 
 
 # Example usage

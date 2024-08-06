@@ -77,6 +77,7 @@ if __name__ == "__main__":
         relevance="",
         chat_history=[],
         hint="",
+        response_type=None,
     )
     state["selected_model"] = gemini_model_name
     _ = normal_question(state)

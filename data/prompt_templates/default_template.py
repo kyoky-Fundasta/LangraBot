@@ -16,6 +16,8 @@ prompt_template = PromptTemplate(
     Chat history: record of previous interactions between the user and the AI agent.\n
   
     You have access to the following tools:\n\n{tools}\n\n
+    The google_search is an alternative to web_search. 
+    Do not use the same tool twice in succession. If you use google_search, use web_earch the next time.    
     
     Use the following format:\n\n
 

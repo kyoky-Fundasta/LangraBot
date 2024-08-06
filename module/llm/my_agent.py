@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Union
 
 from module.vector.pineconeDB import FundastA_Policy
 from module.web.tavily import web_search
-
+from module.web.google import google_search
 from data.prompt_templates.agent_callback_tempalte import (
     prompt_template as callback_template,
 )
@@ -215,6 +215,7 @@ def ai_agent(chat_state: GraphState) -> GraphState:
     tools = [
         FundastA_Policy(callbacks=[dynamic_callback]),
         web_search(callbacks=[dynamic_callback]),
+        google_search(callbacks=[dynamic_callback]),
     ]
     agent = create_react_agent(
         llm=llm, tools=tools, prompt=prompt, stop_sequence=["Observation"]

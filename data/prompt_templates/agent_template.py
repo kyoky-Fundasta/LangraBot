@@ -4,6 +4,8 @@ Answer the following questions by referring to the provided chat history.
 Use the historical context to better understand the current question and provide a more accurate and relevant answer.
 
 You have access to the following tools: {tools}
+The google_search is an alternative to web_search. 
+Do not use the same tool twice in succession. If you use google_search, use web_earch the next time.
 
 Use the following format:
 

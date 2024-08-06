@@ -63,3 +63,4 @@ class GraphState(TypedDict):
     rewrotten_question_answer: str
     reasoning: str
     source: str
+    response_type: int

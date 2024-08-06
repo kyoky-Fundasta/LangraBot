@@ -15,7 +15,7 @@ model = st.selectbox("LLM models", menu_options)
 who = st.selectbox("Log-in options", login_options)
 
 st.sidebar.title("MENU")
-ai_bot = st.sidebar.radio("", ["チャットで質問", "メールで問い合わせ", "資料検索"])
+ai_bot = st.sidebar.radio("MENU", ["チャットで質問", "メールで問い合わせ", "資料検索"])
 
 if ai_bot == "チャットで質問":
 
@@ -39,21 +39,29 @@ if ai_bot == "チャットで質問":
             )
 
             if who == "Guest":
-
-                formatted_answer = ai_answer["answer"] + "\n👦 Guest mode"
+                formatted_answer = ai_answer["answer"] + "  👦 Guest mode"
+                feedback = None
             elif who == "FundastA_社員":
-                last_answer = ai_answer["answer"] + "\n🏢 社員 mode"
-                if ai_answer["relevance"] == "grounded":
-                    feedback = "判定：🌞　　feedback : " + ai_answer["reasoning"]
-                elif ai_answer["relevance"] == "":
-                    feedback = ""
-                else:
-                    feedback = "判定：☔　　feedback : " + ai_answer["reasoning"]
-                formatted_answer = last_answer + "\n" + feedback
+                last_answer = ai_answer["answer"]
+                if ai_answer["response_type"] == 1:
+                    feedback = (
+                        "判定：🌞　　feedback : "
+                        + ai_answer["reasoning"]
+                        + "source :"
+                        + ai_answer["source"]
+                    )
+                elif ai_answer["response_type"] == 0:
+                    feedback = None
+                elif ai_answer["response_type"] == -1:
+                    feedback = (
+                        "関連情報が不足したため、正確な回答を作成することが来ませんでした。\n判定：☔　　feedback : "
+                        + ai_answer["reasoning"]
+                    )
+                formatted_answer = last_answer + "  🏢 社員 mode"
         st.session_state["message"].append(
             {
                 "role": "assistant",
-                "content": formatted_answer,
+                "content": ai_answer["answer"],
             }
         )
         st.session_state["message"].append(
@@ -62,13 +70,16 @@ if ai_bot == "チャットで質問":
                 "content": input,
             }
         )
-        st.session_state["chat_history"].append((input, formatted_answer))
+        st.session_state["chat_history"].append((input, ai_answer["answer"]))
 
         if st.session_state["message"]:
-
+            f = 0
             for message in st.session_state["message"][::-1]:
+                f += 1
                 with st.chat_message(message["role"]):
+                    print(f)
                     st.write(message["content"])
+            st.write(feedback)
 
 elif ai_bot == "メールで問い合わせ":
     pass
