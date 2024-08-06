@@ -10,6 +10,8 @@ ipython
 text-tools
 langchain-google-genai==0.0.6
 base_agent
+requests
+google-api-core
 # blinker
 # typing_extensions
 # protobuf

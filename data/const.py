@@ -16,6 +16,8 @@ env_openai = st.secrets["OPENAI_API_KEY_FundastA"]
 env_genai = st.secrets["Gemini_API_KEY_An"]
 env_smith = st.secrets["LANGCHAIN_API_KEY"]
 env_pinecone = st.secrets["Pinecone_API_KEY"]
+env_google = st.secrets["Google_API_KEY_An"]
+CSE_ID = st.secrets["Search_Engine_ID_An"]
 pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
 
 

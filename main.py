@@ -1,5 +1,6 @@
 import streamlit as st
 from app import chat
+from data.const import GraphState
 
 
 # WebUI (Streamlit)
@@ -38,6 +39,7 @@ if ai_bot == "チャットで質問":
             )
 
             if who == "Guest":
+
                 formatted_answer = ai_answer["answer"] + "\n👦 Guest mode"
             elif who == "FundastA_社員":
                 last_answer = ai_answer["answer"] + "\n🏢 社員 mode"
