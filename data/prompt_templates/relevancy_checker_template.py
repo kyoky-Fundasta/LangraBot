@@ -53,7 +53,7 @@ context: "<content>Mount Fuji is the tallest mountain in Japan.</content><source
 
 result: not grounded
 reasoning: The answer is true but does not address the user's question. The correct answer should be Mount Fuji.
-source : 日本の山 PDFファイル　page : 10
+source : 日本の山 PDFファイル - page : 10
 
 # Example 4:
 question: "What is the tallest mountain in Japan?"
@@ -72,7 +72,7 @@ web: "<content>Mount Fuji is the tallest mountain in Japan.</content><source>htt
 
 result: grounded
 reasoning: The answer addresses the question and is grounded in the source information.
-source : "日本の山 PDFファイル:page 10, web:https://test.aa.bb/"
+source : "日本の山 PDFファイル - page : 10,  web : https://test.aa.bb/"
 
 
 # Example 6:
@@ -83,7 +83,7 @@ web: "<content>Mount Fuji is the tallest mountain in Japan.</content><source>htt
 
 result: not sure
 reasoning: I found some information regarding the question, but I was unable to answer all the questions.
-source : "日本の山 PDFファイル:page 10, web:https://test.aa.bb/"
+source : "日本の山 PDFファイル - page 10,  web : https://test.aa.bb/"
 
 
 
