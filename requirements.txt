@@ -8,7 +8,7 @@ langchain-community
 langgraph
 ipython
 text-tools
-langchain-google-genai==0.0.6
+langchain-google-genai
 base_agent
 requests
 google-ai-generativelanguage
