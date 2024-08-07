@@ -25,7 +25,7 @@ class web_search(BaseTool):
     def _run(self, input_str: str):
 
         search = TavilySearchAPIWrapper()
-        search_tool = TavilySearchResults(max_results=10, api_wrapper=search)
+        search_tool = TavilySearchResults(max_results=6, api_wrapper=search)
         search_result = search_tool.invoke({"query": input_str})
 
         search_result = format_searched_docs(search_result, input_str)

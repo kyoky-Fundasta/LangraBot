@@ -62,16 +62,17 @@ def chat(user_question, chat_history, model_name, who):
     chat_state = GraphState(
         selected_model=model_name,
         question=user_question,
-        context="",
-        web="",
+        context=None,
+        web=None,
         answer="",
-        relevance="",
+        relevance=None,
         chat_history=chat_history,
-        hint="",
-        rewrotten_question="",
-        rewrotten_question_answer="",
-        reasoning="",
-        source="",
+        hint=None,
+        rewrotten_question=None,
+        rewrotten_question_answer=None,
+        reasoning=None,
+        source=None,
+        response_type=None,
     )
 
     print("------First state : ", chat_state)
@@ -79,35 +80,58 @@ def chat(user_question, chat_history, model_name, who):
     # The guest only can use normal LLM fuction
     if who == "Guest":
         final_answer = normal_question(chat_state)
+        print("\n\n------------Normal mode :", type(final_answer), final_answer)
         return final_answer
 
     # Members can use RAG & Onlin search features.
     elif who == "FundastA_社員":
         chat_state_agent = ai_agent(chat_state)
-        if chat_state["context"] == "" and chat_state["web"] == "":
-            chat_state["response_type"] = 0
-            print("\n\n---------Routine 0------------\n\n", chat_state)
-            return chat_state
-        else:
-            chat_state = groundedness_check(chat_state_agent)
+        print(
+            "\n\n-----------received state at app.py :",
+            type(chat_state_agent),
+            chat_state_agent,
+        )
 
-        if chat_state["relevance"] == "grounded":
-            chat_state["response_type"] = 1
+        if chat_state_agent["context"] == None and chat_state_agent["web"] == None:
+            # chat_state["response_type"] = "0"
             print(
-                f'\n\n----------------Entering routine 1 : {chat_state["relevance"]}---------------------\n\n',
-                chat_state,
+                "\n\n---------Routine 0------------\n\n",
+                type(chat_state_agent),
+                chat_state_agent,
             )
-            return chat_state
+            return chat_state_agent
+        else:
+            print(
+                "\n\n---------Routine 1------------\n\n",
+                type(chat_state_agent),
+                chat_state_agent,
+            )
+            chat_state_agent_checked = groundedness_check(chat_state_agent)
+            print(
+                "\n\n-------------checked data :",
+                type(chat_state_agent_checked),
+                chat_state_agent_checked,
+            )
+        if chat_state_agent_checked["relevance"] == "grounded":
+            # chat_state["response_type"] = "1"
+            print(
+                f'\n\n----------------Entering routine 1 : {chat_state_agent_checked["relevance"]}---------------------\n\n',
+                chat_state_agent_checked,
+            )
+            return chat_state_agent_checked
         elif (
-            chat_state["relevance"] == "not grounded"
-            or chat_state["relevance"] == "not sure"
+            chat_state_agent_checked["relevance"] == "not grounded"
+            or chat_state_agent_checked["relevance"] == "not sure"
         ):
-            chat_state["response_type"] = -1
-            print("\n\n---------Routine -1------------\n\n", chat_state)
+            # chat_state["response_type"] = "-1"
+            print(
+                "\n\n---------Entering Routine -1------------\n\n",
+                chat_state_agent_checked,
+            )
 
-            return chat_state
+            return chat_state_agent_checked
 
-        elif chat_state["relevance"] == "under my consideration":
+        elif chat_state["relevance"] == "dummy process":
             print(
                 f'\n\n----------------Entering routine 2 : {chat_state["relevance"]}---------------------\n\n',
                 chat_state,
@@ -169,7 +193,7 @@ def chat(user_question, chat_history, model_name, who):
                 print(f"Recursion limit reached: {e}")
 
             chat_state["response_type"] = 0
-            print("\n\n----------------Answering routine 2---------------------\n\n", _)
+            print("\n\n----------------Answering routine 2---------------------\n\n")
 
             return 0
 

@@ -29,7 +29,6 @@ if ai_bot == "チャットで質問":
         input = st.chat_input("👤質問を入力してください")
 
     if input:
-
         with st.spinner("🤖 考え中......"):
             ai_answer = chat(
                 user_question=input,
@@ -37,50 +36,76 @@ if ai_bot == "チャットで質問":
                 model_name=model,
                 who=who,
             )
-
-            if who == "Guest":
-                formatted_answer = ai_answer["answer"] + "  👦 Guest mode"
-                feedback = None
-            elif who == "FundastA_社員":
-                last_answer = ai_answer["answer"]
-                if ai_answer["response_type"] == 1:
-                    feedback = (
-                        "判定：🌞　　feedback : "
-                        + ai_answer["reasoning"]
-                        + "source :"
-                        + ai_answer["source"]
+            print(
+                "\n\n------------Main Program From Here----------------\n\nai_answer :",
+                type(ai_answer),
+                ai_answer,
+            )
+            feedback = None
+            source = None
+            if ai_answer is not None:
+                if who == "Guest":
+                    st.session_state["message"].append(
+                        {
+                            "role": "assistant",
+                            "content": ai_answer["answer"] + "  [👦 Guest mode]",
+                        }
                     )
-                elif ai_answer["response_type"] == 0:
-                    feedback = None
-                elif ai_answer["response_type"] == -1:
-                    feedback = (
-                        "関連情報が不足したため、正確な回答を作成することが来ませんでした。\n判定：☔　　feedback : "
-                        + ai_answer["reasoning"]
-                    )
-                formatted_answer = last_answer + "  🏢 社員 mode"
-        st.session_state["message"].append(
-            {
-                "role": "assistant",
-                "content": ai_answer["answer"],
-            }
-        )
-        st.session_state["message"].append(
-            {
-                "role": "user",
-                "content": input,
-            }
-        )
-        st.session_state["chat_history"].append((input, ai_answer["answer"]))
 
-        if st.session_state["message"]:
-            f = 0
-            for message in st.session_state["message"][::-1]:
-                f += 1
-                with st.chat_message(message["role"]):
-                    print(f)
-                    st.write(message["content"])
-            st.write(feedback)
+                elif who == "FundastA_社員":
 
+                    if ai_answer["relevance"] == "grounded":
+                        feedback = "判定：🌞　　feedback : " + ai_answer["reasoning"]
+                        source = "source :" + ai_answer["source"]
+                        st.session_state["message"].append(
+                            {
+                                "role": "assistant",
+                                "content": ai_answer["answer"] + "  [🏢 社員 mode]",
+                            }
+                        )
+                    elif ai_answer["relevance"] == None:
+                        st.session_state["message"].append(
+                            {
+                                "role": "assistant",
+                                "content": ai_answer["answer"] + "  [🏢 社員 mode]",
+                            }
+                        )
+                    elif ai_answer["relevance"] != "grounded":
+                        feedback = "\n判定：☔　　feedback : " + ai_answer["reasoning"]
+                        source = "source :" + ai_answer["source"]
+
+                        st.session_state["message"].append(
+                            {
+                                "role": "assistant",
+                                "content": "AI：次の答えは間違ってる可能性があります。再度確認することをお勧めします。\n"
+                                + ai_answer["answer"]
+                                + "  [🏢 社員 mode]",
+                            }
+                        )
+
+                st.session_state["message"].append(
+                    {
+                        "role": "user",
+                        "content": input,
+                    }
+                )
+                st.session_state["chat_history"].append((input, ai_answer["answer"]))
+
+                if st.session_state["message"]:
+                    f = 0
+                    print("\n---------feedback :", feedback, source)
+                    for message in st.session_state["message"][::-1]:
+                        f += 1
+                        print("\n---------counter :", f)
+                        if f == 3 and feedback != None:
+                            st.write(feedback)
+                            if source != None:
+                                st.write(source)
+                        with st.chat_message(message["role"]):
+                            st.write(message["content"])
+            else:
+                st.error("AI answer was None. Please check the chat function.")
+                st.write(ai_answer)
 elif ai_bot == "メールで問い合わせ":
     pass
 

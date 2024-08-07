@@ -8,18 +8,15 @@ from langchain.agents import (
     AgentExecutor,
     create_react_agent,
 )
-from langchain.agents.react.base import ReActDocstoreAgent
 from langchain.prompts import PromptTemplate
-from langchain.tools import BaseTool
-from langchain.chains import LLMChain
-from langchain.agents import Agent, BaseSingleActionAgent
-from langchain.schema import AgentAction, AgentFinish
-from langchain.agents.agent import BaseSingleActionAgent
+
+# from langchain.agents import Agent, BaseSingleActionAgent
+from langchain.schema import AgentFinish
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain_core.outputs import LLMResult
 from langchain_core.output_parsers import StrOutputParser
 
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional
 from typing import Any, Dict, List, Union
 
 
@@ -33,10 +30,7 @@ from data.prompt_templates.agent_template import prompt_template, agent_updated_
 from data.prompt_templates.default_template import prompt_template as default_template
 from data.const import (
     llm_switch,
-    gemini_model_name,
     GraphState,
-    gpt_model_name,
-    gpt_mini_model_name,
 )
 
 
@@ -86,7 +80,7 @@ class DynamicPromptCallback(BaseCallbackHandler):
         self.agent.get_prompts()[0].partial_variables["tool_output"] = (
             self.tool_output_values[-1] if self.tool_output_values else "None"
         )
-        print("\n----------------prompt updated------------------\n")
+        # print("\n----------------prompt updated------------------\n")
 
     ## Updating action is alternative way of controlling agent's behavior.
 
@@ -105,13 +99,14 @@ class DynamicPromptCallback(BaseCallbackHandler):
     ):
         if self.original_question is None:
             self.original_question = inputs["question"]
-        print(f"\n------------------Chain start : {self.original_question}\n")
+        # print(f"\n------------------Chain start : {self.original_question}\n")
 
     def on_llm_start(
         self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
     ) -> None:
         # print(f"\n------------------LLM start\n{serialized}\n")
-        print(f"\n------------------LLM start\n\n")
+        # print(f"\n------------------LLM start\n\n")
+        pass
 
     ## To observe how the agent's llm generates tokens.
     # def on_llm_new_token(
@@ -126,7 +121,7 @@ class DynamicPromptCallback(BaseCallbackHandler):
     #     print(f"\n------------------New token : {token}\n")
 
     def on_agent_action(self, action, **kwargs):
-        print(f"\n------------------#{self.action_count} Agent action:")
+        # print(f"\n------------------#{self.action_count} Agent action:")
 
         self.action_count += 1
 
@@ -138,7 +133,7 @@ class DynamicPromptCallback(BaseCallbackHandler):
         self.used_tool_name.append(kwargs["name"])
         self.tool_output_values.append(output)
         self.update_prompt()
-        print(f"\n\n-----------#{self.tool_counter} : Tool ended----------------\n")
+        # print(f"\n\n-----------#{self.tool_counter} : Tool ended----------------\n")
         self.tool_counter += 1
 
     def on_agent_finish(
@@ -158,8 +153,8 @@ class DynamicPromptCallback(BaseCallbackHandler):
 
             try:
                 finish.return_values["output"] = self.refined_output
-            except:
-                print("hohoho")
+            except Exception as e:
+                print("error :", e)
         print("\n\n---------------Agent finished\n\n")
 
     def on_llm_end(
@@ -173,9 +168,9 @@ class DynamicPromptCallback(BaseCallbackHandler):
         if self.action_count < 4:
             trimmed_comment = self.trim_llm_text(response.generations[0][0].text)
             self.llm_comment = self.llm_comment + trimmed_comment
-        print(
-            f"\n------------------LLM end : \n{self.llm_comment}\n--------------------"
-        )
+        # print(
+        #     f"\n------------------LLM end : \n{self.llm_comment}\n--------------------"
+        # )
 
     def on_chain_end(
         self,
@@ -185,7 +180,7 @@ class DynamicPromptCallback(BaseCallbackHandler):
         parent_run_id: UUID | None = None,
         **kwargs: Any,
     ) -> Any:
-        print(f"\n------------------Chain end : {outputs}\n")
+        # print(f"\n------------------Chain end : {outputs}\n")
 
         # if outputs["output"] == "Agent stopped due to iteration limit or time limit.":
         #     self.refined_output = self.refine_failed_response()
@@ -235,18 +230,22 @@ def ai_agent(chat_state: GraphState) -> GraphState:
     input_variables = {"question": chat_state["question"], "history": chat_history_str}
 
     agent_final_answer = agent_executor.invoke(input_variables)
+    print("\n------agent answerd :", agent_final_answer)
+    # agent_final_answer = {"output": "test answer"}
     chat_state["answer"] = agent_final_answer["output"]
-    chat_state["hint"] = (
-        chat_state["hint"]
-        + "・質問："
-        + chat_state["question"]
-        + "\n・回答："
-        + chat_state["answer"]
-        + "\n・回答の根拠："
-        + dynamic_callback.llm_comment
-        + "\n"
-    )
-
+    print("\n------State answer updated :", chat_state)
+    if chat_state["hint"]:
+        chat_state["hint"] = (
+            chat_state["hint"]
+            + "・質問："
+            + chat_state["question"]
+            + "\n・回答："
+            + chat_state["answer"]
+            + "\n・回答の根拠："
+            + dynamic_callback.llm_comment
+            + "\n"
+        )
+    print("\n------State hint updated 2 :", chat_state)
     # Add tool's outputs to the state.
     for output in dynamic_callback.tool_outputs:
         if "FundastA_Policy" in output:
@@ -254,7 +253,7 @@ def ai_agent(chat_state: GraphState) -> GraphState:
         elif "web_search" in output:
             chat_state["web"] = output["web_search"]
     # print(chat_state)
-    print(chat_state["answer"])
+    print("\n------The last state :", type(chat_state), chat_state)
 
     return chat_state
 

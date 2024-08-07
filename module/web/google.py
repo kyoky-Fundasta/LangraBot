@@ -26,7 +26,7 @@ class google_search(BaseTool):
         response = requests.get(search_url)
         results = response.json()
         search_results = format_searched_google(
-            [results["items"][i] for i in range(10)], input_str
+            [results["items"][i] for i in range(6)], input_str
         )
         # print(search_results)
         return "\n\n" + search_results + "\n\n"

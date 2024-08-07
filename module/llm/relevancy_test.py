@@ -25,37 +25,38 @@ class check_output(BaseModel):
 # return groundedness result in json format : result, reasoning, source
 def groundedness_check(input_state: GraphState) -> GraphState:
     selected_model = input_state["selected_model"]
-    if not (input_state["context"] and input_state["web"]):
-        input_state["relevance"] = ""
+    if input_state["context"] == None and input_state["web"] == None:
         return input_state
+    else:
+        parser = JsonOutputParser(pydantic_object=check_output)
 
-    parser = JsonOutputParser(pydantic_object=check_output)
+        prompt = PromptTemplate(
+            template=prompt_template,
+            input_variables=["question"],
+            partial_variables={
+                "answer": input_state["answer"],
+                "context": input_state["context"],
+                "web": input_state["web"],
+                "history": input_state["chat_history"],
+                "format_instructions": parser.get_format_instructions(),
+            },
+        )
+        llm = llm_switch(selected_model)
 
-    prompt = PromptTemplate(
-        template=prompt_template,
-        input_variables=["question"],
-        partial_variables={
-            "answer": input_state["answer"],
-            "context": input_state["context"],
-            "web": input_state["web"],
-            "history": input_state["chat_history"],
-            "format_instructions": parser.get_format_instructions(),
-        },
-    )
-    llm = llm_switch(selected_model)
-
-    chain = prompt | llm | parser
-    result_json = chain.invoke({"question": input_state["question"]})
-    input_state["relevance"] = result_json["result"]
-    input_state["reasoning"] = result_json["reasoning"]
-    input_state["source"] = result_json["source"]
-    print(
-        "\n\n------------------Double check result :",
-        type(result_json),
-        "\n",
-        result_json,
-    )
-    return input_state
+        chain = prompt | llm | parser
+        result_json = chain.invoke({"question": input_state["question"]})
+        input_state["relevance"] = result_json["result"]
+        input_state["reasoning"] = result_json["reasoning"]
+        input_state["source"] = result_json["source"]
+        if input_state["source"] == "":
+            input_state["source"] == None
+        print(
+            "\n\n------------------Double check result :",
+            type(result_json),
+            "\n",
+            result_json,
+        )
+        return input_state
 
 
 def is_grounded(result_json):

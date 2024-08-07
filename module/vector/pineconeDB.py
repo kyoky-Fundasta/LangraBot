@@ -32,30 +32,6 @@ except Exception as e:
     print(f"Traceback: {traceback.format_exc()}")
 
 
-# #   RAG document retrieval
-# def retrieve_document(state: GraphState) -> GraphState:
-
-#     # Retrieves related refence from VectorDB
-#     retrieved_docs = retriever.invoke(state["question"])
-#     # Reshape the data
-#     retrieved_docs = format_docs(retrieved_docs)
-#     state["context"] = retrieved_docs
-
-#     # Preserve it in a GraphState
-#     return state
-
-
-# def retrieve_document_str() -> str:
-
-#     # Retrieves related refence from VectorDB
-#     retrieved_docs = retriever.invoke(state["question"])
-#     # Reshape the data
-#     retrieved_docs = format_docs(retrieved_docs)
-
-#     # Preserve it in a GraphState
-#     return retrieved_docs
-
-
 class FundastA_Policy(BaseTool):
     name: str = "FundastA_Policy"
     description: str = (
@@ -101,4 +77,4 @@ if __name__ == "__main__":
     # Using the class
     tool = FundastA_Policy()
     result = tool._run("有給休暇")
-    print("\n\nClass :", result)
+    # print("\n\nClass :", result)
