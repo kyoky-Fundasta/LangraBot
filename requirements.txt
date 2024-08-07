@@ -1,5 +1,5 @@
 python-dotenv
-langcahain
+langchain
 langchain-core
 lngchain-openai
 langchain-pinecone
