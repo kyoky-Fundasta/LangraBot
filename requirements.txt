@@ -1,7 +1,7 @@
 python-dotenv
 langchain
 langchain-core
-lngchain-openai
+langchain-openai
 langchain-pinecone
 langchain-upstage
 langchain-community
