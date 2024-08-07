@@ -56,7 +56,7 @@ if ai_bot == "チャットで質問":
 
                     if ai_answer["relevance"] == "grounded":
                         feedback = "判定：🌞　　feedback : " + ai_answer["reasoning"]
-                        source = "source :" + ai_answer["source"]
+                        source = "source : " + ai_answer["source"]
                         st.session_state["message"].append(
                             {
                                 "role": "assistant",
@@ -72,7 +72,7 @@ if ai_bot == "チャットで質問":
                         )
                     elif ai_answer["relevance"] != "grounded":
                         feedback = "\n判定：☔　　feedback : " + ai_answer["reasoning"]
-                        source = "source :" + ai_answer["source"]
+                        source = "source : " + ai_answer["source"]
 
                         st.session_state["message"].append(
                             {
