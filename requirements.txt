@@ -20,6 +20,7 @@ googleapis-common-protos
 protobuf
 cffi
 cryptography
+streamlit
 # blinker
 # typing_extensions
 # protobuf
