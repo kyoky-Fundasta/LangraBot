@@ -25,9 +25,14 @@ class google_search(BaseTool):
         search_url = f"https://www.googleapis.com/customsearch/v1?q={input_str}&key={google_api_key}&cx={google_cx}"
         response = requests.get(search_url)
         results = response.json()
-        search_results = format_searched_google(
-            [results["items"][i] for i in range(6)], input_str
-        )
+        if len(results["items"]) >= 6:
+            search_results = format_searched_google(
+                [results["items"][i] for i in range(6)], input_str
+            )
+        else:
+            search_results = format_searched_google(
+                [results["items"][i] for i in range(len(results["items"]))], input_str
+            )
         # print(search_results)
         return "\n\n" + search_results + "\n\n"
 

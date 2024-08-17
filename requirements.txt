@@ -21,6 +21,8 @@ protobuf
 cffi
 cryptography
 streamlit
+boto3
+warrant
 # blinker
 # typing_extensions
 # protobuf
