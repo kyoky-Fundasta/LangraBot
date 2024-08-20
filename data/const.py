@@ -19,10 +19,7 @@ env_pinecone = st.secrets["Pinecone_API_KEY"]
 env_google = st.secrets["Google_API_KEY_An"]
 CSE_ID = st.secrets["Search_Engine_ID_An"]
 pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
-
-user_pool_id = st.secrets["USER_POOL_ID"]
 client_id = st.secrets["CLIENT_ID"]
-region = st.secrets["REGION"]
 
 
 def llm_switch(selected_model):
