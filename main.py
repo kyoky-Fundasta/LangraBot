@@ -1,6 +1,44 @@
 import streamlit as st
 from app import chat
 from data.const import GraphState
+import requests
+from urllib.parse import urlparse, parse_qs
+from data.const import client_id
+
+cognito_domain = "fundasta-ai-assistant"
+client_id = client_id
+region = "ap-northeast-1"
+redirect_uri = "https://fundasta-aibot.streamlit.app/"
+
+login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
+
+query_params = st.experimental_get_query_params()
+if "code" in query_params:
+    auth_code = query_params["code"][0]
+
+    token_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/oauth2/token"
+    data = {
+        "grant_type": "authorization_code",
+        "client_id": client_id,
+        "code": auth_code,
+        "redirect_uri": redirect_uri,
+    }
+
+    response = requests.post(token_url, data=data)
+    tokens = response.json()
+
+    if response.status_code == 200:
+        st.success("Login successful")
+        st.session_state["tokens"] = tokens
+
+    else:
+        st.error("Login failure")
+else:
+    st.markdown(
+        f'<meta http-equiv="refresh" content="0;url={login_url}">',
+        unsafe_allow_html=True,
+    )
+    st.stop()
 
 
 # WebUI (Streamlit)

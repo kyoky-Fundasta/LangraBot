@@ -26,6 +26,7 @@ prompt_template = PromptTemplate(
     Action Input: the input to the action\n
     Observation: the result of the action\n
     ... (this Thought/Action/Action Input/Observation can repeat 3 times.  On the 3rd iteration, generate your best answer or say 'I do not know' with the reason why.)\n
+    
     Thought: I now know the final answer\
     Final Answer: the final answer to the original input question in Japanese\n\n
 
