@@ -11,7 +11,7 @@ region = "ap-northeast-1"
 redirect_uri = "https://fundasta-aibot.streamlit.app/"
 
 login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
-
+st.write("Attempting to connect to:", login_url)
 query_params = st.query_params
 if "code" in query_params:
     auth_code = query_params["code"][0]
