@@ -5,25 +5,16 @@ import requests
 from urllib.parse import urlparse, parse_qs
 from data.const import client_id
 
+
 cognito_domain = "fundasta-ai-assistant"
-client_id = client_id
+client_id = st.secrets["client_id"]
 region = "ap-northeast-1"
 redirect_uri = "https://fundasta-aibot.streamlit.app/"
 
 login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
 
-# Use JavaScript to redirect to avoid iframe issues
-st.components.v1.html(
-    f"""
-    <script type="text/javascript">
-        window.location.href = "{login_url}";
-    </script>
-"""
-)
-st.stop()
-
+# Check if we're in the callback phase
 query_params = st.experimental_get_query_params()
-st.write(query_params)
 
 if "code" in query_params:
     auth_code = query_params["code"][0]
@@ -42,11 +33,34 @@ if "code" in query_params:
     if response.status_code == 200:
         st.success("Login successful")
         st.session_state["tokens"] = tokens
-
     else:
         st.error("Login failure")
+        st.write("Error details:", tokens)
 else:
-    st.stop()
+    # If not in callback phase, show login button
+    st.markdown(
+        f"""
+    <a href="{login_url}" target="_blank">
+        <button style="
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        ">
+            Login with Cognito
+        </button>
+    </a>
+    """,
+        unsafe_allow_html=True,
+    )
+
+st.write("Current query parameters:", query_params)
 
 
 # WebUI (Streamlit)
