@@ -10,13 +10,9 @@ client_id = client_id
 region = "ap-northeast-1"
 redirect_uri = "https://fundasta-aibot.streamlit.app/"
 
-login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
-st.write("Attempting to connect to:", login_url)
-query_params = st.query_params
-st.write(query_params)
+query_params = st.experimental_get_query_params()
 if "code" in query_params:
     auth_code = query_params["code"][0]
-    st.write("Authorization code received:", auth_code)
     token_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/oauth2/token"
     data = {
         "grant_type": "authorization_code",
@@ -24,22 +20,23 @@ if "code" in query_params:
         "code": auth_code,
         "redirect_uri": redirect_uri,
     }
-
     response = requests.post(token_url, data=data)
-    tokens = response.json()
-
     if response.status_code == 200:
-        st.success("Login successful")
+        tokens = response.json()
         st.session_state["tokens"] = tokens
+        st.success("Login successful")
+        # Clear the 'code' from URL
+        st.experimental_set_query_params()
 
     else:
-        st.error("Login failure")
+        st.error(f"Login failure: {response.text}")
+
 else:
+    login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
+    st.write("Please log in to continue.")
     st.markdown(
-        f'<meta http-equiv="refresh" content="0;url={login_url}">',
-        unsafe_allow_html=True,
+        f'<a href="{login_url}" target="_self">Login</a>', unsafe_allow_html=True
     )
-    st.stop()
 
 
 # WebUI (Streamlit)
