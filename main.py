@@ -14,7 +14,7 @@ redirect_uri = (
 login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
 
 # Check if we're in the callback phase
-query_params = st.query_params
+query_params = st.experimental_get_query_params()
 
 if "code" in query_params:
     auth_code = query_params["code"][0]
@@ -38,13 +38,27 @@ if "code" in query_params:
         st.error("Login failure")
         st.write("Error details:", tokens)
 else:
-    # If not in callback phase, automatically redirect to the Cognito login page
+    # If not in callback phase, show login button
     st.markdown(
         f"""
-    <script type="text/javascript">
-        window.location.href = "{login_url}";
-    </script>
+    <a href="{login_url}" target="_self">
+        <button style="
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        ">
+            Login with Cognito
+        </button>
+    </a>
     """,
         unsafe_allow_html=True,
     )
-    st.stop()
+
+st.write("Current query parameters:", query_params)
