@@ -41,7 +41,7 @@ else:
     # If not in callback phase, show login button
     st.markdown(
         f"""
-    <a href="{login_url}" target="_self">
+    <a href="{login_url}" target="_blank">
         <button style="
             background-color: #4CAF50;
             border: none;
