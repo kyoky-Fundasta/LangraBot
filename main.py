@@ -12,6 +12,10 @@ redirect_uri = "https://fundasta-aibot.streamlit.app/"
 
 login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
 st.write("Attempting to connect to:", login_url)
+st.markdown(
+    f'<a href="{login_url}" target="_blank"><button>Log In</button></a>',
+    unsafe_allow_html=True,
+)
 query_params = st.experimental_get_query_params()
 st.write(query_params)
 if "code" in query_params:
@@ -35,10 +39,10 @@ if "code" in query_params:
     else:
         st.error("Login failure")
 else:
-    st.markdown(
-        f'<meta http-equiv="refresh" content="0;url={login_url}">',
-        unsafe_allow_html=True,
-    )
+    # st.markdown(
+    #     f'<meta http-equiv="refresh" content="0;url={login_url}">',
+    #     unsafe_allow_html=True,
+    # )
     st.stop()
 
 
