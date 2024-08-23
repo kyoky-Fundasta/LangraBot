@@ -11,8 +11,8 @@ region = "ap-northeast-1"
 redirect_uri = "https://fundasta-aibot.streamlit.app/"
 
 login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
-st.write("Attempting to connect to:", login_url)
 
+# Use JavaScript to redirect to avoid iframe issues
 st.components.v1.html(
     f"""
     <script type="text/javascript">
@@ -20,10 +20,11 @@ st.components.v1.html(
     </script>
 """
 )
-
+st.stop()
 
 query_params = st.experimental_get_query_params()
 st.write(query_params)
+
 if "code" in query_params:
     auth_code = query_params["code"][0]
     st.write("Authorization code received:", auth_code)
@@ -45,10 +46,6 @@ if "code" in query_params:
     else:
         st.error("Login failure")
 else:
-    # st.markdown(
-    #     f'<meta http-equiv="refresh" content="0;url={login_url}">',
-    #     unsafe_allow_html=True,
-    # )
     st.stop()
 
 
