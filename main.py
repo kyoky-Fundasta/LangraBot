@@ -6,6 +6,9 @@ from urllib.parse import urlparse, parse_qs
 from data.const import client_id
 
 
+# WebUI (Streamlit)
+st.set_page_config(layout="wide")
+
 cognito_domain = "fundasta-ai-assistant"
 client_id = st.secrets["client_id"]
 region = "ap-northeast-1"
@@ -63,8 +66,6 @@ else:
 st.write("Current query parameters:", query_params)
 
 
-# WebUI (Streamlit)
-st.set_page_config(layout="wide")
 st.title("💬 FundastA サポートデスク")
 st.caption("🤖 私は株式会社FundastAのAIアシストです。")
 
