@@ -14,7 +14,7 @@ redirect_uri = (
 login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
 
 # Check if we're in the callback phase
-query_params = st.experimental_get_query_params()
+query_params = st.query_params()
 
 if "code" in query_params:
     auth_code = query_params["code"][0]
