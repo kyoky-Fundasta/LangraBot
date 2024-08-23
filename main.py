@@ -12,7 +12,16 @@ redirect_uri = "https://fundasta-aibot.streamlit.app/"
 
 login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
 st.write("Attempting to connect to:", login_url)
-st.write(f'<a href="{login_url}" target="_blank">Log In</a>', unsafe_allow_html=True)
+
+st.components.v1.html(
+    f"""
+    <script type="text/javascript">
+        window.location.href = "{login_url}";
+    </script>
+"""
+)
+
+
 query_params = st.experimental_get_query_params()
 st.write(query_params)
 if "code" in query_params:
