@@ -61,14 +61,12 @@ if "code" in query_params:
     if response.status_code == 200:
         st.success("Login successful")
         st.session_state["tokens"] = tokens
-        st.write(
-            """
-            <script>
-            window.location.href = '/employ_mode';
-            </script>
-            """,
-            unsafe_allow_html=True,
-        )
+        js_code = """
+        <script>
+        window.location.href = '/employ_mode';
+        </script>
+        """
+        st.components.v1.html(js_code, height=0, width=0)
     else:
         st.error("Login failure")
         st.write("Error details:", tokens)
