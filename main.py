@@ -61,14 +61,14 @@ if "code" in query_params:
     if response.status_code == 200:
         st.success("Login successful")
         st.session_state["tokens"] = tokens
-        st.experimental_rerun()
-        st.markdown("/employ_mode", unsafe_allow_html=True)
-        # st.markdown(
-        #     f"""
-        #     <meta http-equiv="refresh" content="0; url='/employ_mode'">
-        #     """,
-        #     unsafe_allow_html=True,
-        # )
+        st.write(
+            """
+            <script>
+            window.location.href = '/employ_mode';
+            </script>
+            """,
+            unsafe_allow_html=True,
+        )
     else:
         st.error("Login failure")
         st.write("Error details:", tokens)
