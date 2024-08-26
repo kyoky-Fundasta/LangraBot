@@ -75,9 +75,8 @@ st.caption("🤖 私は株式会社FundastAのAIアシストです。")
 
 
 menu_options = ["ChatGPT_4o_mini", "ChatGPT_3.5", "Gemini_1.5_Flash", "Claude"]
-login_options = ["FundastA_社員", "Guest"]
 model = st.selectbox("LLM models", menu_options)
-who = st.selectbox("Log-in options", login_options)
+who = "FundastA_社員"
 
 st.sidebar.title("MENU")
 ai_bot = st.sidebar.radio("MENU", ["チャットで質問", "メールで問い合わせ", "資料検索"])
@@ -109,44 +108,35 @@ if ai_bot == "チャットで質問":
             feedback = None
             source = None
             if ai_answer is not None:
-                if who == "Guest":
+
+                if ai_answer["relevance"] == "grounded":
+                    feedback = "判定：🌞　　feedback : " + ai_answer["reasoning"]
+                    source = "source : " + ai_answer["source"]
                     st.session_state["message"].append(
                         {
                             "role": "assistant",
-                            "content": ai_answer["answer"] + "  [👦 Guest mode]",
+                            "content": ai_answer["answer"] + "  [🏢 社員 mode]",
                         }
                     )
+                elif ai_answer["relevance"] == None:
+                    st.session_state["message"].append(
+                        {
+                            "role": "assistant",
+                            "content": ai_answer["answer"] + "  [🏢 社員 mode]",
+                        }
+                    )
+                elif ai_answer["relevance"] != "grounded":
+                    feedback = "\n判定：☔　　feedback : " + ai_answer["reasoning"]
+                    source = "source : " + ai_answer["source"]
 
-                elif who == "FundastA_社員":
-
-                    if ai_answer["relevance"] == "grounded":
-                        feedback = "判定：🌞　　feedback : " + ai_answer["reasoning"]
-                        source = "source : " + ai_answer["source"]
-                        st.session_state["message"].append(
-                            {
-                                "role": "assistant",
-                                "content": ai_answer["answer"] + "  [🏢 社員 mode]",
-                            }
-                        )
-                    elif ai_answer["relevance"] == None:
-                        st.session_state["message"].append(
-                            {
-                                "role": "assistant",
-                                "content": ai_answer["answer"] + "  [🏢 社員 mode]",
-                            }
-                        )
-                    elif ai_answer["relevance"] != "grounded":
-                        feedback = "\n判定：☔　　feedback : " + ai_answer["reasoning"]
-                        source = "source : " + ai_answer["source"]
-
-                        st.session_state["message"].append(
-                            {
-                                "role": "assistant",
-                                "content": "AI：次の答えは間違ってる可能性があります。再度確認することをお勧めします。\n"
-                                + ai_answer["answer"]
-                                + "  [🏢 社員 mode]",
-                            }
-                        )
+                    st.session_state["message"].append(
+                        {
+                            "role": "assistant",
+                            "content": "AI：次の答えは間違ってる可能性があります。再度確認することをお勧めします。\n"
+                            + ai_answer["answer"]
+                            + "  [🏢 社員 mode]",
+                        }
+                    )
 
                 st.session_state["message"].append(
                     {
