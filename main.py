@@ -36,15 +36,12 @@ with col1:
 
 with col2:
     if st.button("社員モード"):
-        st.components.v1.html(
-            f"""
-            <script>
-            window.open("{login_url}", "_blank");
-            </script>
-            """,
-            height=0,  # No visible space occupied
-            width=0,  # No visible space occupied
-        )
+        js_code = f"""
+        <script>
+        window.open("{login_url}", "_blank");
+        </script>
+        """
+        st.components.v1.html(js_code, height=0, width=0)
         # st.markdown(
         #     f"""
         #     <meta http-equiv="refresh" content="0; url='{login_url}'">
