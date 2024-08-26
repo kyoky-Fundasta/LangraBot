@@ -16,9 +16,7 @@ st.set_page_config(
 cognito_domain = "fundasta-ai-assistant"
 client_id = st.secrets["client_id"]
 region = "ap-northeast-1"
-redirect_uri = (
-    "https://fundasta-aibot.streamlit.app/UI"  # Redirect to chat.py after login
-)
+redirect_uri = "https://fundasta-aibot.streamlit.app/pages/employ_mode"  # Redirect to chat.py after login
 
 login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
 
@@ -42,12 +40,6 @@ with col2:
         </script>
         """
         st.components.v1.html(js_code, height=0, width=0)
-        # st.markdown(
-        #     f"""
-        #     <meta http-equiv="refresh" content="0; url='{login_url}'">
-        #     """,
-        #     unsafe_allow_html=True,
-        # )
 
 # Check if we're in the callback phase
 query_params = st.experimental_get_query_params()
