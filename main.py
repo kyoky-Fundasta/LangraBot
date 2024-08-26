@@ -27,7 +27,7 @@ with col1:
     if st.button("ゲストモード"):
         st.markdown(
             f"""
-            <meta http-equiv="refresh" content="0; url='/pages/guest_mode'">
+            <meta http-equiv="refresh" content="0; url='/guest_mode'">
             """,
             unsafe_allow_html=True,
         )
@@ -63,7 +63,7 @@ if "code" in query_params:
         st.session_state["tokens"] = tokens
         st.markdown(
             f"""
-            <meta http-equiv="refresh" content="0; url='/pages/employ_mode'">
+            <meta http-equiv="refresh" content="0; url='/employ_mode'">
             """,
             unsafe_allow_html=True,
         )
