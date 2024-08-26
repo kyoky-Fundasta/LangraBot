@@ -22,7 +22,7 @@ with col1:
     if st.button("ゲストモード"):
         st.markdown(
             f"""
-            <meta http-equiv="refresh" content="0; url='/UI.py'">
+            <meta http-equiv="refresh" content="0; url='/UI'">
             """,
             unsafe_allow_html=True,
         )
@@ -31,7 +31,7 @@ with col2:
     if st.button("社員モード"):
         st.markdown(
             f"""
-            <meta http-equiv="refresh" content="0; url'{login_url}'">
+            <meta http-equiv="refresh" content="0; url='{login_url}'">
             """,
             unsafe_allow_html=True,
         )
@@ -58,7 +58,7 @@ if "code" in query_params:
         st.session_state["tokens"] = tokens
         st.markdown(
             f"""
-            <meta http-equiv="refresh" content="0; url='/UI.py'">
+            <meta http-equiv="refresh" content="0; url='/UI'">
             """,
             unsafe_allow_html=True,
         )
