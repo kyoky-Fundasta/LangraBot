@@ -36,17 +36,21 @@ with col1:
 
 with col2:
     if st.button("社員モード"):
-        st.markdown(
-            # f"""
-            # <meta http-equiv="refresh" content="0; url='{login_url}'">
-            # """,
+        st.components.v1.html(
             f"""
             <script>
             window.open("{login_url}", "_blank");
             </script>
             """,
-            unsafe_allow_html=True,
+            height=0,  # No visible space occupied
+            width=0,  # No visible space occupied
         )
+        # st.markdown(
+        #     f"""
+        #     <meta http-equiv="refresh" content="0; url='{login_url}'">
+        #     """,
+        #     unsafe_allow_html=True,
+        # )
 
 # Check if we're in the callback phase
 query_params = st.experimental_get_query_params()
