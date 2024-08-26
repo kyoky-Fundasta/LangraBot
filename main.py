@@ -3,6 +3,7 @@ import requests
 from urllib.parse import urlparse, parse_qs
 from data.const import client_id
 
+
 # Set up AWS Cognito configuration
 cognito_domain = "fundasta-ai-assistant"
 client_id = st.secrets["client_id"]
@@ -12,6 +13,28 @@ redirect_uri = (
 )
 
 login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
+
+
+st.title("FundastA AI Assistant")
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("ゲストモード"):
+        st.markdown(
+            f"""
+            <meta http-equiv="refresh" content="0; url='/UI.py'">
+            """,
+            unsafe_allow_html=True,
+        )
+
+with col2:
+    if st.button("社員モード"):
+        st.markdown(
+            f"""
+            <meta http-equiv="refresh" content="0; url'{login_url}'">
+            """,
+            unsafe_allow_html=True,
+        )
 
 # Check if we're in the callback phase
 query_params = st.experimental_get_query_params()
@@ -33,32 +56,12 @@ if "code" in query_params:
     if response.status_code == 200:
         st.success("Login successful")
         st.session_state["tokens"] = tokens
-        st.experimental_rerun()  # Redirect to chat after successful login
+        st.markdown(
+            f"""
+            <meta http-equiv="refresh" content="0; url='/UI.py'">
+            """,
+            unsafe_allow_html=True,
+        )
     else:
         st.error("Login failure")
         st.write("Error details:", tokens)
-else:
-    # If not in callback phase, show login button
-    st.markdown(
-        f"""
-    <a href="{login_url}" target="_blank">
-        <button style="
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-        ">
-            Login with Cognito
-        </button>
-    </a>
-    """,
-        unsafe_allow_html=True,
-    )
-
-st.write("Current query parameters:", query_params)
