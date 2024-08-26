@@ -8,15 +8,15 @@ from data.const import client_id
 st.set_page_config(
     page_title="FundastA AI Assistant",
     page_icon="🤖",
-    layout="wide",  # Use "wide" to minimize sidebar
-    initial_sidebar_state="collapsed",  # Hide sidebar by default
+    layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
 # Set up AWS Cognito configuration
 cognito_domain = "fundasta-ai-assistant"
 client_id = st.secrets["client_id"]
 region = "ap-northeast-1"
-redirect_uri = "https://fundasta-aibot.streamlit.app/pages/employ_mode"  # Redirect to chat.py after login
+redirect_uri = "https://fundasta-aibot.streamlit.app"
 
 login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
 
@@ -27,7 +27,7 @@ with col1:
     if st.button("ゲストモード"):
         st.markdown(
             f"""
-            <meta http-equiv="refresh" content="0; url='/guest_mode'">
+            <meta http-equiv="refresh" content="0; url='/pages/guest_mode'">
             """,
             unsafe_allow_html=True,
         )
@@ -63,7 +63,7 @@ if "code" in query_params:
         st.session_state["tokens"] = tokens
         st.markdown(
             f"""
-            <meta http-equiv="refresh" content="0; url='/employ_mode'">
+            <meta http-equiv="refresh" content="0; url='/pages/employ_mode'">
             """,
             unsafe_allow_html=True,
         )
