@@ -24,25 +24,23 @@ col1, col2 = st.columns(2)
 
 with col1:
     if st.button("ゲストモード"):
-        st.query_params["mode"] = (
-            "guest_mode"  # CHANGED: Using st.query_params directly
+        st.markdown(
+            f'<meta http-equiv="refresh" content="0;url=?mode=guest_mode">',
+            unsafe_allow_html=True,
         )
-        st.rerun()
 
 with col2:
     if st.button("社員モード"):
-        js_code = f"""
-        <script>
-        window.open("{login_url}", "_self");
-        </script>
-        """
-        st.components.v1.html(js_code, height=0, width=0)
+        st.markdown(
+            f'<meta http-equiv="refresh" content="0;url={login_url}">',
+            unsafe_allow_html=True,
+        )
 
 # Check if we're in the callback phase
-query_params = dict(st.query_params)
+query_params = st.query_params
 
 if "code" in query_params:
-    auth_code = query_params["code"][0]
+    auth_code = query_params.get("code")[0]
     st.write("Authorization code received:", auth_code)
     token_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/oauth2/token"
     data = {
@@ -58,8 +56,17 @@ if "code" in query_params:
     if response.status_code == 200:
         st.success("Login successful")
         st.session_state["tokens"] = tokens
-        st.query_params["mode"] = "employ_mode"
-        st.rerun()
+        st.markdown(
+            '<meta http-equiv="refresh" content="0;url=?mode=employ_mode">',
+            unsafe_allow_html=True,
+        )
     else:
         st.error("Login failure")
         st.write("Error details:", tokens)
+
+# Handle different modes
+mode = query_params.get("mode", [None])[0]
+if mode == "guest_mode":
+    st.write("Welcome to Guest Mode!")
+elif mode == "employ_mode":
+    st.write("Welcome to Employee Mode!")
