@@ -3,7 +3,6 @@ import requests
 from urllib.parse import urlparse, parse_qs
 from data.const import client_id
 
-
 # Set up AWS Cognito configuration
 st.set_page_config(
     page_title="FundastA AI Assistant",
@@ -25,7 +24,9 @@ col1, col2 = st.columns(2)
 
 with col1:
     if st.button("ゲストモード"):
-        st.query_params["mode"] = "guest_mode"
+        st.query_params["mode"] = (
+            "guest_mode"  # CHANGED: Using st.query_params directly
+        )
         st.rerun()
 
 with col2:
@@ -38,7 +39,7 @@ with col2:
         st.components.v1.html(js_code, height=0, width=0)
 
 # Check if we're in the callback phase
-query_params = st.query_params
+query_params = dict(st.query_params)
 
 if "code" in query_params:
     auth_code = query_params["code"][0]
