@@ -35,7 +35,7 @@ with col2:
     if st.button("社員モード"):
         js_code = f"""
         <script>
-        window.open("{login_url}", "_black");
+        window.location.href = "{login_url}";
         </script>
         """
         st.components.v1.html(js_code, height=0, width=0)
