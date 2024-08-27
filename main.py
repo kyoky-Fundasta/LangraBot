@@ -24,17 +24,21 @@ col1, col2 = st.columns(2)
 
 with col1:
     if st.button("ゲストモード"):
-        st.markdown(
-            f'<meta http-equiv="refresh" content="0;url=?mode=guest_mode">',
-            unsafe_allow_html=True,
-        )
+        js_code = f"""
+        <script>
+        window.location.href = "{st.runtime.get_instance().get_script_run_ctx().app_url}?mode=guest_mode";
+        </script>
+        """
+        st.components.v1.html(js_code, height=0, width=0)
 
 with col2:
     if st.button("社員モード"):
-        st.markdown(
-            f'<meta http-equiv="refresh" content="0;url={login_url}">',
-            unsafe_allow_html=True,
-        )
+        js_code = f"""
+        <script>
+        window.open("{login_url}", "_self");
+        </script>
+        """
+        st.components.v1.html(js_code, height=0, width=0)
 
 # Check if we're in the callback phase
 query_params = st.query_params
@@ -50,19 +54,24 @@ if "code" in query_params:
         "redirect_uri": redirect_uri,
     }
 
-    response = requests.post(token_url, data=data)
-    tokens = response.json()
+    try:
+        response = requests.post(token_url, data=data)
+        tokens = response.json()
 
-    if response.status_code == 200:
-        st.success("Login successful")
-        st.session_state["tokens"] = tokens
-        st.markdown(
-            '<meta http-equiv="refresh" content="0;url=?mode=employ_mode">',
-            unsafe_allow_html=True,
-        )
-    else:
-        st.error("Login failure")
-        st.write("Error details:", tokens)
+        if response.status_code == 200:
+            st.success("Login successful")
+            st.session_state["tokens"] = tokens
+            js_code = f"""
+            <script>
+            window.location.href = "{st.runtime.get_instance().get_script_run_ctx().app_url}?mode=employ_mode";
+            </script>
+            """
+            st.components.v1.html(js_code, height=0, width=0)
+        else:
+            st.error("Login failure")
+            st.write("Error details:", tokens)
+    except requests.exceptions.RequestException as e:
+        st.error(f"Connection error: {str(e)}")
 
 # Handle different modes
 mode = query_params.get("mode", [None])[0]
