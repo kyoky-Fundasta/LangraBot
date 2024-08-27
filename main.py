@@ -3,25 +3,12 @@ import requests
 from urllib.parse import urlparse, parse_qs
 from data.const import client_id
 
-# Set up AWS Cognito configuration
-st.set_page_config(
-    page_title="FundastA AI Assistant",
-    page_icon="🤖",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
-
-# Set up AWS Cognito configuration
-cognito_domain = "fundasta-ai-assistant"
-client_id = st.secrets["client_id"]
-region = "ap-northeast-1"
-redirect_uri = "https://fundasta-aibot.streamlit.app"
-
-login_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}"
+# ... (keep the existing configuration code)
 
 st.title("FundastA AI Assistant")
 col1, col2 = st.columns(2)
 
+# Keep the first button as it is
 with col1:
     if st.button("ゲストモード"):
         st.markdown(
@@ -31,19 +18,21 @@ with col1:
             unsafe_allow_html=True,
         )
 
+# Update the second button
 with col2:
     if st.button("社員モード"):
-        js_code = f"""
-        <script>
-        window.location.href = "{login_url}";
-        </script>
-        """
-        st.components.v1.html(js_code, height=0, width=0)
+        st.markdown(
+            f"""
+            <meta http-equiv="refresh" content="0; url='{login_url}'>
+            """,
+            unsafe_allow_html=True,
+        )
+
 # Check if we're in the callback phase
 query_params = st.query_params
 
 if "code" in query_params:
-    auth_code = query_params.get("code")[0]
+    auth_code = query_params.get("code")
     st.write("Authorization code received:", auth_code)
     token_url = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/oauth2/token"
     data = {
@@ -60,20 +49,18 @@ if "code" in query_params:
         if response.status_code == 200:
             st.success("Login successful")
             st.session_state["tokens"] = tokens
-            js_code = f"""
-            <script>
-            window.location.href = "{st.runtime.get_instance().get_script_run_ctx().app_url}?mode=employ_mode";
-            </script>
-            """
-            st.components.v1.html(js_code, height=0, width=0)
+            st.query_params["mode"] = "employ_mode"
+            st.rerun()
         else:
             st.error("Login failure")
             st.write("Error details:", tokens)
+            st.write("Response status code:", response.status_code)
+            st.write("Full response:", response.text)
     except requests.exceptions.RequestException as e:
         st.error(f"Connection error: {str(e)}")
 
 # Handle different modes
-mode = query_params.get("mode", [None])[0]
+mode = query_params.get("mode")
 if mode == "guest_mode":
     st.write("Welcome to Guest Mode!")
 elif mode == "employ_mode":
