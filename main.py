@@ -24,22 +24,21 @@ col1, col2 = st.columns(2)
 
 with col1:
     if st.button("ゲストモード"):
-        js_code = f"""
-        <script>
-        window.location.href = "{st.runtime.get_instance().get_script_run_ctx().app_url}?mode=guest_mode";
-        </script>
-        """
-        st.components.v1.html(js_code, height=0, width=0)
+        st.markdown(
+            f"""
+            <meta http-equiv="refresh" content="0; url='/guest_mode'">
+            """,
+            unsafe_allow_html=True,
+        )
 
 with col2:
     if st.button("社員モード"):
         js_code = f"""
         <script>
-        window.open("{login_url}", "_self");
+        window.open("{login_url}", "_black");
         </script>
         """
         st.components.v1.html(js_code, height=0, width=0)
-
 # Check if we're in the callback phase
 query_params = st.query_params
 
