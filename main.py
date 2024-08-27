@@ -25,12 +25,8 @@ col1, col2 = st.columns(2)
 
 with col1:
     if st.button("ゲストモード"):
-        st.markdown(
-            f"""
-            <meta http-equiv="refresh" content="0; url='/guest_mode'">
-            """,
-            unsafe_allow_html=True,
-        )
+        st.query_params["mode"] = "guest_mode"
+        st.rerun()
 
 with col2:
     if st.button("社員モード"):
@@ -43,6 +39,8 @@ with col2:
 
 # Check if we're in the callback phase
 query_params = st.experimental_get_query_params()
+st.experimental_set_query_params()
+st.query_params
 
 if "code" in query_params:
     auth_code = query_params["code"][0]
@@ -61,12 +59,8 @@ if "code" in query_params:
     if response.status_code == 200:
         st.success("Login successful")
         st.session_state["tokens"] = tokens
-        js_code = """
-        <script>
-        window.location.href = '/employ_mode';
-        </script>
-        """
-        st.components.v1.html(js_code, height=0, width=0)
+        st.query_params["mode"] = "employ_mode"
+        st.rerun()
     else:
         st.error("Login failure")
         st.write("Error details:", tokens)
