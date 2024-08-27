@@ -38,9 +38,7 @@ with col2:
         st.components.v1.html(js_code, height=0, width=0)
 
 # Check if we're in the callback phase
-query_params = st.experimental_get_query_params()
-st.experimental_set_query_params()
-st.query_params
+query_params = st.query_params
 
 if "code" in query_params:
     auth_code = query_params["code"][0]
