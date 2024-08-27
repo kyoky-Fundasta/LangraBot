@@ -36,12 +36,13 @@ with col1:
 # Update the second button
 with col2:
     if st.button("社員モード"):
+        st.write("Redirecting to login page...")
         st.markdown(
-            f"""
-            <meta http-equiv="refresh" content="0; url='{login_url}'>
-            """,
+            f'<meta http-equiv="refresh" content="0;url={login_url}">',
             unsafe_allow_html=True,
         )
+        st.stop()
+
 
 # Check if we're in the callback phase
 query_params = st.query_params
